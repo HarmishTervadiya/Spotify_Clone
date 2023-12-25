@@ -1,6 +1,8 @@
 package com.example.spotify_clone.screens
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,7 +35,8 @@ fun ContainerScreen(){
 
             // Screens to be displayed
 
-            Crossfade(targetState = Router.currentScreen.value, label = "") { screen ->
+            Crossfade(targetState = Router.currentScreen.value, label = "",animationSpec = tween(easing =  LinearEasing)
+            ) { screen ->
                 when(screen){
                     is Screen.HomeScreen ->{
                         HomeScreen()

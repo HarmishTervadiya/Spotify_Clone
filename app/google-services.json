@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "470684949469",
+    "project_id": "spotify-clone-red-ronin",
+    "storage_bucket": "spotify-clone-red-ronin.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:470684949469:android:38eda1a180a40f0e3c3434",
+        "android_client_info": {
+          "package_name": "com.example.spotify_clone"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUFscz_-q4H07TVl8urnI2wouLUOE8P1c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

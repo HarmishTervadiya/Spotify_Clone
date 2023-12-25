@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -59,6 +60,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("com.google.firebase:firebase-auth:22.3.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -72,4 +74,10 @@ dependencies {
 
     //Bottom Nav
 //    implementation("androidx.navigation:navigation-compose:2.7.6")
+
+    //For Google Sign in
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+
+    //Analytics
+    implementation("com.google.firebase:firebase-analytics")
 }

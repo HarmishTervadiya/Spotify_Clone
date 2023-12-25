@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,7 +45,8 @@ class MainActivity : ComponentActivity() {
             Spotify_CloneTheme {
                 // A surface container using the 'background' color from the theme
 
-                Crossfade(targetState = Router.currentScreen.value) {screen ->
+                Crossfade(targetState = Router.currentScreen.value, animationSpec = tween(easing = LinearEasing))
+                { screen ->
                     when(screen){
                         is Screen.RegisterScreen ->{
                             RegisterScreen()

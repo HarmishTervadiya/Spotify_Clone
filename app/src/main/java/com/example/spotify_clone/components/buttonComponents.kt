@@ -34,6 +34,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.spotify_clone.data.LoginRegisterViewModel
+import com.example.spotify_clone.data.UIEvent
 import kotlinx.coroutines.launch
 
 @Composable
@@ -42,9 +44,12 @@ fun SignUPButton(
     textColor: Color,
     icon:ImageVector,
     paddingValues: Dp,
+    state:Boolean=true,
     onClick:()->Unit){
 
-    ElevatedButton(onClick = { onClick.invoke() },
+    ElevatedButton(
+        enabled = state,
+        onClick = { onClick.invoke() },
         modifier = Modifier
             .padding(paddingValues)
             .fillMaxWidth()
@@ -71,6 +76,7 @@ fun SignUPButton(
 @Composable
 fun RegisterBottomSheet(sheetState: SheetState){
 
+    val registrationViewModel=LoginRegisterViewModel()
     val scaffoldState= rememberBottomSheetScaffoldState(
         bottomSheetState = sheetState
     )
@@ -96,11 +102,15 @@ fun RegisterBottomSheet(sheetState: SheetState){
             Column(modifier=Modifier.fillMaxSize()){
 
                 HeadingText(value = "Sign Up",Color.Black)
-                InputTextBox(value = "Enter your Name", onChange = {}, state =false )
-                InputTextBox(value = "Enter your Email", onChange = {}, state =false )
-                InputTextBox(value = "Enter your Password", onChange = {}, state =false )
+                InputTextBox(value = "Enter your Name", onChange = { registrationViewModel.onEvent(
+                    UIEvent.NameChanged(it)) }, state = registrationViewModel.registrationUIState.value.nameError)
 
-                SignUPButton(value = "Register", bgColor = Color.Red, textColor =Color.White , icon =Icons.Filled.Clear, paddingValues = 28.dp) {}
+                InputTextBox(value = "Enter your Email", onChange = { registrationViewModel.onEvent(UIEvent.EmailChanged(it)) }, state =registrationViewModel.registrationUIState.value.emailError )
+                InputTextBox(value = "Enter your Password", onChange = { registrationViewModel.onEvent(UIEvent.PasswordChanged(it)) }, state =registrationViewModel.registrationUIState.value.passwordError )
+
+                SignUPButton(value = "Register", bgColor = Color.Red, textColor =Color.White , icon =Icons.Filled.Clear, paddingValues = 28.dp,state=registrationViewModel.registerValidation.value) {
+                    registrationViewModel.onEvent(UIEvent.RegisterButtonClicked)
+                }
 
                 RoundButton(onClick = {
                     scope.launch {
