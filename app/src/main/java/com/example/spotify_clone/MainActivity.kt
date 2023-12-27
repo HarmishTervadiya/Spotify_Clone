@@ -27,16 +27,24 @@ import com.example.spotify_clone.screens.LoginScreen
 import com.example.spotify_clone.screens.RegisterScreen
 import com.example.spotify_clone.ui.theme.Background
 import com.example.spotify_clone.ui.theme.Spotify_CloneTheme
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    val auth=FirebaseAuth.getInstance()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val splash=SplashScreenModel()
 
+        if (auth.currentUser!=null){
+            Router.navigateTo(Screen.HomeScreen)
+        }
+
+
+        val splash=SplashScreenModel()
         installSplashScreen().apply {
             this.setKeepOnScreenCondition{splash.isLoading.value}
         }
@@ -49,7 +57,7 @@ class MainActivity : ComponentActivity() {
                 { screen ->
                     when(screen){
                         is Screen.RegisterScreen ->{
-                            RegisterScreen()
+                            RegisterScreen(this)
                         }
 
                         is Screen.LoginScreen ->{
@@ -66,6 +74,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
 }
 
 
@@ -115,7 +124,7 @@ class SplashScreenModel : ViewModel(){
     val isLoading=_isLoading.asStateFlow()
     init {
         viewModelScope.launch {
-            delay(3000)
+            delay(2000)
             _isLoading.value=false
         }
     }

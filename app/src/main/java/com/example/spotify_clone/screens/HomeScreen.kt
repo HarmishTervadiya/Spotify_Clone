@@ -1,6 +1,7 @@
 package com.example.spotify_clone.screens
 
 import android.os.Build
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.example.spotify_clone.R
 import com.example.spotify_clone.components.AlbumCard
 import com.example.spotify_clone.components.HeadingText
+import com.example.spotify_clone.data.LoginRegisterViewModel
 import com.example.spotify_clone.ui.theme.Background
 import java.time.Clock
 import java.time.LocalTime
@@ -80,13 +82,16 @@ fun HomeScreen(){
                             .fillMaxHeight()
                     )
                     Icon(
-                        imageVector = Icons.Filled.Favorite,
+                        imageVector = Icons.Filled.ExitToApp,
                         contentDescription = "Favourite",
                         tint = Color.Red,
                         modifier = Modifier
                             .fillMaxHeight()
                             .padding(15.dp)
                             .align(Alignment.Bottom)
+                            .clickable {
+                                LoginRegisterViewModel().logout()
+                            }
                     )
 
                     Icon(

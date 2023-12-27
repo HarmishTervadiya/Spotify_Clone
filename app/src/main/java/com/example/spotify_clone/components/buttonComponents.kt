@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
 import com.example.spotify_clone.data.LoginRegisterViewModel
 import com.example.spotify_clone.data.UIEvent
 import kotlinx.coroutines.launch
@@ -120,6 +121,14 @@ fun RegisterBottomSheet(sheetState: SheetState){
 
 
             }
+            
+            if(registrationViewModel.errorMessage.value){
+
+                Popup(alignment = Alignment.Center) {
+                    Text(text = registrationViewModel.error.value, fontSize = 20.sp, textAlign = TextAlign.Center, color = Color.Red)
+                }    
+            }
+
 
         }
 

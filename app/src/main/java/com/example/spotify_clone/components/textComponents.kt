@@ -105,7 +105,9 @@ fun LoginInputTextBox(value: String,onChange:(String)->Unit,state:Boolean){
             unfocusedTextColor = Color.White,
             focusedLabelColor = Color.LightGray,
             errorContainerColor = Color.Transparent,
-            unfocusedLabelColor = Color.White
+            unfocusedLabelColor = Color.White,
+            unfocusedSupportingTextColor = Color.White,
+            errorTextColor = Color.White
 
             ),
         keyboardOptions = KeyboardOptions(imeAction= ImeAction.Next),
