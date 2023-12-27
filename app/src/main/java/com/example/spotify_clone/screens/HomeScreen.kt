@@ -1,5 +1,6 @@
 package com.example.spotify_clone.screens
 
+import android.content.Context
 import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,13 +35,14 @@ import com.example.spotify_clone.R
 import com.example.spotify_clone.components.AlbumCard
 import com.example.spotify_clone.components.HeadingText
 import com.example.spotify_clone.data.LoginRegisterViewModel
+import com.example.spotify_clone.musicPlayer.Player
 import com.example.spotify_clone.ui.theme.Background
 import java.time.Clock
 import java.time.LocalTime
 import java.time.ZoneId
 
 @Composable
-fun HomeScreen(){
+fun HomeScreen(context: Context){
 
     Surface(modifier = Modifier.fillMaxSize(),
         color = Background) {
@@ -96,12 +98,15 @@ fun HomeScreen(){
 
                     Icon(
                         imageVector = Icons.Filled.Settings,
-                        contentDescription = "Favourite",
+                        contentDescription = "Setting",
                         tint = Color.White,
                         modifier = Modifier
                             .fillMaxHeight()
                             .padding(12.dp)
                             .align(Alignment.Bottom)
+                            .clickable {
+                                Player(context).playSong("https://firebasestorage.googleapis.com/v0/b/spotify-clone-red-ronin.appspot.com/o/Ganpati%20Bappa.mp3?alt=media&token=6a75275a-9fa4-47a5-a16a-66627cabfda2")
+                            }
                     )
 
                 }
@@ -128,5 +133,5 @@ fun HomeScreen(){
 @Composable
 fun DefaultPreviewHomeScreen(){
 
-    HomeScreen()
+//    HomeScreen()
 }

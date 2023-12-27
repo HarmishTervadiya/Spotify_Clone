@@ -1,5 +1,6 @@
 package com.example.spotify_clone.screens
 
+import android.content.Context
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -18,7 +19,7 @@ import com.example.spotify_clone.ui.theme.Background
 
 
 @Composable
-fun ContainerScreen(){
+fun ContainerScreen(context: Context){
     Scaffold(
         containerColor = Background,
         bottomBar = { BottomNav() },
@@ -39,7 +40,7 @@ fun ContainerScreen(){
             ) { screen ->
                 when(screen){
                     is Screen.HomeScreen ->{
-                        HomeScreen()
+                        HomeScreen(context=context)
                     }
 
                     is Screen.SearchScreen ->{
@@ -51,7 +52,7 @@ fun ContainerScreen(){
                     }
                     
                     else -> {
-                        HomeScreen()
+                        HomeScreen(context)
                     }
                 }
 
@@ -67,5 +68,5 @@ fun ContainerScreen(){
 @Preview
 @Composable
 fun DefaultPreviewContainerScreen(){
-    ContainerScreen()
+//    ContainerScreen()
 }

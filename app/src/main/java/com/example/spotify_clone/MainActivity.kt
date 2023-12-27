@@ -25,6 +25,7 @@ import com.example.spotify_clone.navigation.Screen
 import com.example.spotify_clone.screens.ContainerScreen
 import com.example.spotify_clone.screens.LoginScreen
 import com.example.spotify_clone.screens.RegisterScreen
+import com.example.spotify_clone.screens.adminScreens.demoScreen
 import com.example.spotify_clone.ui.theme.Background
 import com.example.spotify_clone.ui.theme.Spotify_CloneTheme
 import com.google.firebase.auth.FirebaseAuth
@@ -39,7 +40,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (auth.currentUser!=null){
+        if(auth.currentUser?.email.toString() == "harmishtervadiya@gmail.com"){
+            Router.navigateTo(Screen.AdminScreen)
+        }
+        else if (auth.currentUser!=null){
             Router.navigateTo(Screen.HomeScreen)
         }
 
@@ -64,8 +68,12 @@ class MainActivity : ComponentActivity() {
                             LoginScreen()
                         }
 
+                        is Screen.AdminScreen ->{
+                            demoScreen()
+                        }
+
                         else ->{
-                            ContainerScreen()
+                            ContainerScreen(this)
                         }
                     }
 

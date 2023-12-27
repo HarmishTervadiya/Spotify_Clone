@@ -82,4 +82,9 @@ dependencies {
 
     //Analytics
 //    implementation("com.google.firebase:firebase-analytics")
+
+    // Media3ExoPlayer
+    implementation ("androidx.media3:media3-exoplayer:1.2.0")
+    implementation ("androidx.media3:media3-exoplayer-dash:1.2.0")
+    implementation ("androidx.media3:media3-ui:1.2.0")
 }

@@ -11,11 +11,12 @@ sealed class Screen{
     data object SearchScreen:Screen()
     data object LibraryScreen:Screen()
 
+    data object AdminScreen:Screen()
 
 }
 
 object Router{
-    var currentScreen: MutableState<Screen> = mutableStateOf(Screen.RegisterScreen)
+    var currentScreen: MutableState<Screen> = mutableStateOf(Screen.HomeScreen)
 
     fun navigateTo(destination:Screen){
         currentScreen.value=destination
