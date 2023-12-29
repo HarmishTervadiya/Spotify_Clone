@@ -44,41 +44,6 @@ data class LoginUIState(
 
     val auth= Firebase.auth
 
-//
-//class GoogleAuth(private val context: Context,
-//    private val oneTapClient:SignInClient){
-//
-//    private val auth =FirebaseAuth.getInstance()
-//
-//    suspend fun signIn():IntentSender? {
-//     val result=try {
-//         oneTapClient.beginSignIn(
-//             buildSignInRequest()
-//         ).await()
-//     }catch (e:Exception){
-//         Log.d("Google Error",e.message.toString())
-//     }
-//
-//        return result.pe
-//    }
-
-
-//    private fun buildSignInRequest():BeginSignInRequest{
-//        return  BeginSignInRequest.builder()
-//            .setGoogleIdTokenRequestOptions(
-//                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-//                    .setSupported(true)
-//                    .setServerClientId(context.getString(R.string.webclient_id))
-//                    .setFilterByAuthorizedAccounts(false)
-//
-//                    .build()
-//            )
-//            .setAutoSelectEnabled(true)
-//            .build()
-//    }
-//
-//}
-
 class LoginRegisterViewModel : ViewModel() {
 
     val error= mutableStateOf("")

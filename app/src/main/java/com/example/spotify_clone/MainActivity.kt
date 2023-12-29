@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.spotify_clone.components.BottomNav
@@ -49,9 +48,9 @@ class MainActivity : ComponentActivity() {
 
 
         val splash=SplashScreenModel()
-        installSplashScreen().apply {
-            this.setKeepOnScreenCondition{splash.isLoading.value}
-        }
+//        installSplashScreen().apply {
+//            this.setKeepOnScreenCondition{splash.isLoading.value}
+//        }
 
         setContent {
             Spotify_CloneTheme {
