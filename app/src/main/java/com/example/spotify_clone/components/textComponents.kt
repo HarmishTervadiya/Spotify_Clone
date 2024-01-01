@@ -161,6 +161,22 @@ fun ClickText(value: String,onClick:()->Unit){
                 text =annotatedText , onClick ={onClick.invoke()}, style = TextStyle(textAlign = TextAlign.Right) )
 }
 
+
+
+@Composable
+fun IndicatorText(value: String,textColor: Color,align: TextAlign){
+
+    Text(text = value, modifier = Modifier
+        .fillMaxWidth()
+        .padding(5.dp)
+        .padding(horizontal = 12.dp),
+        fontSize = 25.sp,
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Bold,
+        color = textColor,
+        textAlign = align)
+}
+
 @Preview
 @Composable
 fun DefaultPreviewTextComponent(){
