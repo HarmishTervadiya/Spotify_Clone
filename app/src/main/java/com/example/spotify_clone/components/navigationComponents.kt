@@ -1,7 +1,9 @@
 package com.example.spotify_clone.components
 
 
+import android.content.Context
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.List
@@ -17,50 +19,55 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.spotify_clone.musicPlayer.Player
 import com.example.spotify_clone.navigation.Router
 import com.example.spotify_clone.navigation.Screen
 import com.example.spotify_clone.ui.theme.Background
 import com.example.spotify_clone.ui.theme.Secondary
 
 @Composable
-fun BottomNav() {
+fun BottomNav(context: Context, player: Player) {
 
-    var selectedItem = remember { mutableIntStateOf(0) }
-    val items = listOf("Home", "Search", "Playlists")
-    val icons= listOf(
-        Icons.Filled.AccountCircle,
-        Icons.Filled.Search,
-        Icons.Filled.List
-    )
+    Column {
 
-    val screens= listOf(
-        Screen.HomeScreen,
-        Screen.SearchScreen,
-        Screen.LibraryScreen
+        var selectedItem = remember { mutableIntStateOf(0) }
+        val items = listOf("Home", "Search", "Playlists")
+        val icons = listOf(
+            Icons.Filled.AccountCircle,
+            Icons.Filled.Search,
+            Icons.Filled.List
+        )
 
-    )
-    NavigationBar(modifier = Modifier.background(Background)
-    , containerColor = Color.Transparent,
-        contentColor = Color.White,
-        tonalElevation = 5.dp,
+        val screens = listOf(
+            Screen.HomeScreen,
+            Screen.SearchScreen,
+            Screen.LibraryScreen
+
+        )
+        NavigationBar(
+            modifier = Modifier.background(Background),
+            containerColor = Color.Transparent,
+            contentColor = Color.White,
+            tonalElevation = 5.dp,
         ) {
-        items.forEachIndexed { index, item ->
-            NavigationBarItem(
-                icon = { Icon(icons[index], contentDescription = item) },
-                label = { Text(item) },
-                selected = Router.currentScreen.value==screens[index],
-                onClick = { Router.navigateTo(screens[index]) },
-                modifier = Modifier.background(Color.Transparent),
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Secondary,
-                    selectedTextColor = Secondary,
-                    indicatorColor = Background,
-                    unselectedIconColor = Color.White,
-                    unselectedTextColor = Color.White,
+            items.forEachIndexed { index, item ->
+                NavigationBarItem(
+                    icon = { Icon(icons[index], contentDescription = item) },
+                    label = { Text(item) },
+                    selected = Router.currentScreen.value == screens[index],
+                    onClick = { Router.navigateTo(screens[index]) },
+                    modifier = Modifier.background(Color.Transparent),
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Secondary,
+                        selectedTextColor = Secondary,
+                        indicatorColor = Background,
+                        unselectedIconColor = Color.White,
+                        unselectedTextColor = Color.White,
 
 
+                        )
                 )
-                )
+            }
         }
     }
 }

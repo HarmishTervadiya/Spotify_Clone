@@ -6,26 +6,16 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.spotify_clone.components.BottomNav
 import com.example.spotify_clone.navigation.Router
 import com.example.spotify_clone.navigation.Screen
 import com.example.spotify_clone.screens.ContainerScreen
 import com.example.spotify_clone.screens.LoginScreen
 import com.example.spotify_clone.screens.RegisterScreen
 import com.example.spotify_clone.screens.adminScreens.demoScreen
-import com.example.spotify_clone.ui.theme.Background
 import com.example.spotify_clone.ui.theme.Spotify_CloneTheme
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
@@ -87,43 +77,43 @@ class MainActivity : ComponentActivity() {
 
 
 
-@Composable
-fun MainScreen() {
-    Scaffold(
-        containerColor = Background,
-        bottomBar = { BottomNav() },
-        contentColor = Background
-        // Place BottomNav within the Scaffold's bottomBar
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .background(Background),
-            // Apply Scaffold's inner padding
-        ) {
-
-            // Screens to be displayed
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = Background
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    Text(text = "Hello Everyone")
-                }
-            }
-
-
-
-
-        }
-    }
-}
+//@Composable
+//fun MainScreen(context: Context) {
+//    Scaffold(
+//        containerColor = Background,
+//        bottomBar = { BottomNav(context = context) },
+//        contentColor = Background
+//        // Place BottomNav within the Scaffold's bottomBar
+//    ) { innerPadding ->
+//        Column(
+//            modifier = Modifier
+//                .padding(innerPadding)
+//                .background(Background),
+//            // Apply Scaffold's inner padding
+//        ) {
+//
+//            // Screens to be displayed
+//            Surface(
+//                modifier = Modifier.fillMaxSize(),
+//                color = Background
+//            ) {
+//                Column(
+//                    modifier = Modifier.fillMaxSize(),
+//                ) {
+//                    Text(text = "Hello Everyone")
+//                }
+//            }
+//
+//
+//
+//
+//        }
+//    }
+//}
 @Preview
 @Composable
 fun DefaultPreviewMainScreen(){
-    MainScreen()
+//    MainScreen()
 }
 
 class SplashScreenModel : ViewModel(){

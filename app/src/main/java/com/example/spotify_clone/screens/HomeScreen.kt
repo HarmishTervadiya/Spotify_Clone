@@ -22,7 +22,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,11 +41,13 @@ import androidx.compose.ui.unit.sp
 import androidx.media3.common.util.UnstableApi
 import com.example.spotify_clone.components.AlbumCard
 import com.example.spotify_clone.components.IndicatorText
+import com.example.spotify_clone.components.NowPlayingBar
 import com.example.spotify_clone.data.Firebase.ArtistViewModel
 import com.example.spotify_clone.data.Firebase.SongsViewModel
 import com.example.spotify_clone.data.HomeViewModel
 import com.example.spotify_clone.data.LoginRegisterViewModel
 import com.example.spotify_clone.musicPlayer.Player
+import com.example.spotify_clone.musicPlayer.PlayerEvent
 import com.example.spotify_clone.ui.theme.Background
 import com.google.firebase.Firebase
 import com.google.firebase.database.database
@@ -52,9 +56,10 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+@kotlin.OptIn(ExperimentalMaterial3Api::class)
 @OptIn(UnstableApi::class) @SuppressLint("CoroutineCreationDuringComposition", "NewApi")
 @Composable
-fun HomeScreen(context: Context){
+fun HomeScreen(context: Context,){
 
     Surface(modifier = Modifier.fillMaxSize(),
         color = Background) {
@@ -62,143 +67,191 @@ fun HomeScreen(context: Context){
         val database = Firebase.database.reference
         val scope= rememberCoroutineScope()
         val homeViewModel=HomeViewModel(context)
-        val player=Player(context)
+        val player =Player(context)
 
+        Scaffold(
+            containerColor = Background,
+            bottomBar = { NowPlayingBar(context = context, player = player)
+            },
+            contentColor = Background
+            // Place BottomNav within the Scaffold's bottomBar
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(8.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
 
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp)){
-            Column(modifier = Modifier
-                .verticalScroll(rememberScrollState())
                 )
-            {
-
-
-                val currentTime= if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    LocalTime.now(Clock.tickMinutes(ZoneId.systemDefault()))
-                } else {
-                    TODO("VERSION.SDK_INT < O")
-                }
-
-                val greeting:String =
-                    if (currentTime.format(DateTimeFormatter.ISO_TIME)>LocalTime.of(20,0,0).format(
-                        DateTimeFormatter.ISO_TIME)){
-                    "Good Night"
-                }else if (currentTime.format(DateTimeFormatter.ISO_TIME)>LocalTime.of(16,0,0).format(
-                        DateTimeFormatter.ISO_TIME)){
-                    "Good Evening"
-                }else if (currentTime.format(DateTimeFormatter.ISO_TIME)>LocalTime.NOON.format(
-                        DateTimeFormatter.ISO_TIME)){
-                    "Good Afternoon"
-                } else {
-                    "Good Morning"
-                }
-
-                Row (horizontalArrangement = Arrangement.Start, modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp))
-
-
                 {
-                    Text(
-                        text = greeting,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .weight(.1f)
-                            .fillMaxHeight()
-                    )
-                    Icon(
-                        imageVector = Icons.Filled.ExitToApp,
-                        contentDescription = "Favourite",
-                        tint = Color.Red,
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .padding(15.dp)
-                            .align(Alignment.Bottom)
-                            .clickable {
-                                LoginRegisterViewModel().logout()
-                            }
-                    )
-                    Icon(
-                        imageVector = Icons.Filled.Settings,
-                        contentDescription = "Setting",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .padding(12.dp)
-                            .align(Alignment.Bottom)
-                            .clickable {
 
-                            }
 
-                    )
+                    val currentTime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        LocalTime.now(Clock.tickMinutes(ZoneId.systemDefault()))
+                    } else {
+                        TODO("VERSION.SDK_INT < O")
+                    }
 
-                }
-
-                // Top Picks
-                IndicatorText(value = "Top Picks", textColor = Color.White, align = TextAlign.Left)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                 val topPicks=SongsViewModel(context).getTopSongs()
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            userScrollEnabled = true,
-                        ){
-
-                            this.items(topPicks){
-                                AlbumCard(title =it.child("Song_Name").value.toString() , image =it.child("cover_image").value.toString(), onClick = {player.playSong(it.child("SongUri").value.toString())})
-                            }
-
+                    val greeting: String =
+                        if (currentTime.format(DateTimeFormatter.ISO_TIME) > LocalTime.of(20, 0, 0)
+                                .format(
+                                    DateTimeFormatter.ISO_TIME
+                                )
+                        ) {
+                            "Good Night"
+                        } else if (currentTime.format(DateTimeFormatter.ISO_TIME) > LocalTime.of(
+                                16,
+                                0,
+                                0
+                            ).format(
+                                DateTimeFormatter.ISO_TIME
+                            )
+                        ) {
+                            "Good Evening"
+                        } else if (currentTime.format(DateTimeFormatter.ISO_TIME) > LocalTime.NOON.format(
+                                DateTimeFormatter.ISO_TIME
+                            )
+                        ) {
+                            "Good Afternoon"
+                        } else {
+                            "Good Morning"
                         }
 
+                    Row(
+                        horizontalArrangement = Arrangement.Start, modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp)
+                    )
 
-                // Top Albums
-                IndicatorText(value = "Top Albums", textColor = Color.White, align = TextAlign.Left)
-                Spacer(modifier = Modifier.height(8.dp))
 
-                val data=homeViewModel.getAllAlbums()
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    userScrollEnabled = true,
-                ){
+                    {
+                        Text(
+                            text = greeting,
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(10.dp)
+                                .weight(.1f)
+                                .fillMaxHeight()
+                        )
+                        Icon(
+                            imageVector = Icons.Filled.ExitToApp,
+                            contentDescription = "Favourite",
+                            tint = Color.Red,
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(15.dp)
+                                .align(Alignment.Bottom)
+                                .clickable {
+                                    LoginRegisterViewModel().logout()
+                                }
+                        )
+                        Icon(
+                            imageVector = Icons.Filled.Settings,
+                            contentDescription = "Setting",
+                            tint = Color.White,
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(12.dp)
+                                .align(Alignment.Bottom)
+                                .clickable {
 
-                    this.items(data){
-                        AlbumCard(title =it.child("title").value.toString() , image =it.child("image").value.toString()){
+                                }
+
+                        )
+
+                    }
+
+
+                    // Top Picks
+                    IndicatorText(
+                        value = "Top Picks",
+                        textColor = Color.White,
+                        align = TextAlign.Left
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    val topPicks = SongsViewModel(context).getTopSongs()
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        userScrollEnabled = true,
+                    ) {
+
+                        this.items(topPicks) {
+                            AlbumCard(
+                                title = it.child("Song_Name").value.toString(),
+                                image = it.child("cover_image").value.toString(),
+                                onClick = { player.onEvent(PlayerEvent.PlaySong(it)) })
+                        }
+
+                    }
+
+
+                    // Top Albums
+                    IndicatorText(
+                        value = "Top Albums",
+                        textColor = Color.White,
+                        align = TextAlign.Left
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    val data = homeViewModel.getAllAlbums()
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        userScrollEnabled = true,
+                    ) {
+
+                        this.items(data) {
+                            AlbumCard(
+                                title = it.child("title").value.toString(),
+                                image = it.child("image").value.toString()
+                            ) {
+
+                            }
 
                         }
 
                     }
 
-                }
+
+                    // Top Artists
+                    IndicatorText(
+                        value = "Top Artists",
+                        textColor = Color.White,
+                        align = TextAlign.Left
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
 
 
-                // Top Artists
-                IndicatorText(value = "Top Artists", textColor = Color.White, align = TextAlign.Left)
-                Spacer(modifier = Modifier.height(8.dp))
+                    val topArtists = ArtistViewModel(context).getAllArtists()
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        userScrollEnabled = true,
 
+                        ) {
 
-                val topArtists=ArtistViewModel(context).getAllArtists()
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    userScrollEnabled = true,
+                        this.items(topArtists) {
+                            AlbumCard(
+                                title = it.child("Artist_Name").value.toString(),
+                                image = it.child("profile").value.toString()
+                            ) {
 
-                ){
-
-                    this.items(topArtists){
-                        AlbumCard(title =it.child("Artist_Name").value.toString() , image =it.child("profile").value.toString()){
+                            }
 
                         }
 
                     }
-
                 }
-
             }
+
         }
+
 
     }
 }

@@ -15,3 +15,4 @@ val Secondary=Color.Red
 val outlines=Color.Transparent
 
 val Background=Color(0xE51F1E1E)
+val LightRed=Color(0xE5EF1313)

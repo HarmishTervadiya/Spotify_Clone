@@ -10,9 +10,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.spotify_clone.components.BottomNav
+import com.example.spotify_clone.musicPlayer.Player
 import com.example.spotify_clone.navigation.Router
 import com.example.spotify_clone.navigation.Screen
 import com.example.spotify_clone.ui.theme.Background
@@ -20,9 +23,13 @@ import com.example.spotify_clone.ui.theme.Background
 
 @Composable
 fun ContainerScreen(context: Context){
+    val player= remember {
+        mutableStateOf(Player(context))
+    }
+
     Scaffold(
         containerColor = Background,
-        bottomBar = { BottomNav() },
+        bottomBar = { BottomNav(context, player.value) },
         contentColor = Background
         // Place BottomNav within the Scaffold's bottomBar
     ) { innerPadding ->
@@ -56,14 +63,20 @@ fun ContainerScreen(context: Context){
                     }
                 }
 
-
             }
 
 
-
         }
+
+
+
+
+
     }
 }
+
+
+
 
 @Preview
 @Composable
