@@ -22,13 +22,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,30 +51,35 @@ import com.example.spotify_clone.data.HomeViewModel
 import com.example.spotify_clone.data.LoginRegisterViewModel
 import com.example.spotify_clone.musicPlayer.Player
 import com.example.spotify_clone.musicPlayer.PlayerEvent
+import com.example.spotify_clone.navigation.Router
+import com.example.spotify_clone.navigation.Screen
 import com.example.spotify_clone.ui.theme.Background
-import com.google.firebase.Firebase
-import com.google.firebase.database.database
+import kotlinx.coroutines.launch
 import java.time.Clock
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-@kotlin.OptIn(ExperimentalMaterial3Api::class)
 @OptIn(UnstableApi::class) @SuppressLint("CoroutineCreationDuringComposition", "NewApi")
 @Composable
-fun HomeScreen(context: Context,){
+fun HomeScreen(context: Context){
+    val player = remember {
+        Player(context)
+    }
 
     Surface(modifier = Modifier.fillMaxSize(),
         color = Background) {
 
-        val database = Firebase.database.reference
+        var showBottomSheet by remember { mutableStateOf(true) }
         val scope= rememberCoroutineScope()
         val homeViewModel=HomeViewModel(context)
-        val player =Player(context)
 
+        fun bottomSheet(){
+            showBottomSheet=true
+        }
         Scaffold(
             containerColor = Background,
-            bottomBar = { NowPlayingBar(context = context, player = player)
+            bottomBar = { NowPlayingBar(context = context, player = player,onCLick={ bottomSheet() })
             },
             contentColor = Background
             // Place BottomNav within the Scaffold's bottomBar
@@ -238,16 +246,25 @@ fun HomeScreen(context: Context,){
 
                         this.items(topArtists) {
                             AlbumCard(
+
                                 title = it.child("Artist_Name").value.toString(),
                                 image = it.child("profile").value.toString()
                             ) {
-
+                                scope.launch {
+                                    Router.navigateTo(
+                                        Screen.PlayListScreen, listOf(
+                                            it.key.toString(),
+                                            it.ref.parent?.key.toString()
+                                        )
+                                    )
+                                }
                             }
 
                         }
 
                     }
                 }
+//                MusicPlayer(showBottomSheet)
             }
 
         }

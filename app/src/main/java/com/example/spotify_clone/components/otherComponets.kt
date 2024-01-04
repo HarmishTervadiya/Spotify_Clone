@@ -17,15 +17,19 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,6 +45,7 @@ import com.example.spotify_clone.R
 import com.example.spotify_clone.musicPlayer.Player
 import com.example.spotify_clone.musicPlayer.PlayerEvent
 import com.example.spotify_clone.ui.theme.Background
+import kotlinx.coroutines.launch
 
 @Composable
 fun HeadingTopBar(value:String,icon1:ImageVector,icon2:ImageVector,onHeartCLick:()->Unit,onSettingClick:()->Unit){
@@ -131,28 +136,30 @@ fun AlbumCard(title:String, image: String, onClick:()->Unit){
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun NowPlayingBar(context: Context,player:Player) {
+fun NowPlayingBar(context: Context,player:Player,onCLick:()->Unit) {
 
 
     val track=mutableStateOf(player.currentSongTrack.value)
-    val onClick= remember {
-        mutableStateOf(
-            if(track.value.isPlaying) { player.onEvent(
-                PlayerEvent.SongPaused(false))
-            } else {
-                player.onEvent(PlayerEvent.SongResumed(true))
-            }
-        )
-    }
+    var showBottomSheet = remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
 
     NavigationBar(modifier = Modifier
         .background(Background)
         .height(70.dp)
+        .clickable {
+            onCLick.invoke()
+            showBottomSheet.value=true
+            scope.launch{
+            }
+        }
         , containerColor = Color(0x3AD8D8D8),
         contentColor = Color.White,
         tonalElevation = 8.dp,
+
         ) {
 
             AsyncImage(model = track.value.image, contentDescription = "", placeholder = painterResource(id = R.drawable.logo),
@@ -204,5 +211,27 @@ fun NowPlayingBar(context: Context,player:Player) {
             }
 
         }
+
+    if (showBottomSheet.value) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showBottomSheet.value = false
+            },
+            sheetState = sheetState,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Sheet content
+            Button(onClick = {
+                scope.launch { sheetState.hide() }.invokeOnCompletion {
+                    if (!sheetState.isVisible) {
+                        showBottomSheet.value =false
+                    }
+                }
+            }) {
+                Text("Hide bottom sheet")
+            }
+        }
+    }
+
     }
 

@@ -1,5 +1,6 @@
 package com.example.spotify_clone.screens
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,17 +11,28 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import com.example.spotify_clone.components.HeadingText
 import com.example.spotify_clone.components.NowPlayingBar
+import com.example.spotify_clone.data.PlayListScreenViewModel
 import com.example.spotify_clone.musicPlayer.Player
 import com.example.spotify_clone.ui.theme.Background
 
+
+@SuppressLint("UnrememberedMutableState")
 @Composable
-fun SearchScreen(context:Context) {
+fun PlayListScreen(context:Context){
+//
+    val listViewModel= remember{ PlayListScreenViewModel() }
+    val listData by remember{
+        mutableStateOf(listViewModel.getData())
+    }
 
     val player = remember {
         Player(context)
@@ -30,21 +42,13 @@ fun SearchScreen(context:Context) {
         modifier = Modifier.fillMaxSize(),
         color = Background
     ) {
-
-        var showBottomSheet = remember { mutableStateOf(false) }
-        val scope = rememberCoroutineScope()
-
-        fun bottomSheet() {
-            showBottomSheet.value = true
-        }
-
         Scaffold(
             containerColor = Background,
             bottomBar = {
-                NowPlayingBar(context = context, player = player, onCLick = { bottomSheet() })
+                NowPlayingBar(context = context, player = player, onCLick = {  })
             },
             contentColor = Background
-            // Place BottomNav within the Scaffold's bottomBar
+
         ) { innerPadding ->
             Box(
                 modifier = Modifier
@@ -55,16 +59,18 @@ fun SearchScreen(context:Context) {
                 Column(
                     modifier = Modifier
                         .verticalScroll(rememberScrollState())
-
                 )
-                {
 
+                {
+//                    val listData= remember{ mutableStateOf(listViewModel.getData()) }
+                    HeadingText(value =listData.listId, textColor = Color.White)
+                    AsyncImage(model = listData.listImage, contentDescription = "Cover Image", modifier = Modifier.fillMaxSize())
                 }
 
             }
-
-
         }
     }
 
 }
+
+

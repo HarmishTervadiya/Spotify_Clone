@@ -63,6 +63,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth:22.3.0")
     implementation("com.google.firebase:firebase-database:20.3.0")
     implementation("com.google.firebase:firebase-storage:20.3.0")
+    implementation("androidx.room:room-ktx:2.6.1")
 //    implementation("com.google.firebase:firebase-firestore-ktx:24.10.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
@@ -91,4 +92,7 @@ dependencies {
 
     // For Loading Images
     implementation("io.coil-kt:coil-compose:2.5.0")
+
+    //ViewModel
+//    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
 }

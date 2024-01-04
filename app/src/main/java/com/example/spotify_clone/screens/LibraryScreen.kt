@@ -1,5 +1,6 @@
 package com.example.spotify_clone.screens
 
+import android.content.Context
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -7,7 +8,7 @@ import com.example.spotify_clone.navigation.Router
 import com.example.spotify_clone.navigation.Screen
 
 @Composable
-fun LibraryScreen(){
+fun LibraryScreen(context: Context) {
 
     Button(onClick = { Router.navigateTo(Screen.HomeScreen) }
     ) {

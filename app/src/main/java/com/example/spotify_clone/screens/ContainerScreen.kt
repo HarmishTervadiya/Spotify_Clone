@@ -51,13 +51,16 @@ fun ContainerScreen(context: Context){
                     }
 
                     is Screen.SearchScreen ->{
-                        SearchScreen()
+                        SearchScreen(context=context)
                     }
 
                     is Screen.LibraryScreen ->{
-                        LibraryScreen()
+                        LibraryScreen(context=context)
                     }
-                    
+
+                    is Screen.PlayListScreen ->{
+                        PlayListScreen(context=context )
+                    }
                     else -> {
                         HomeScreen(context)
                     }
