@@ -35,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,10 +61,9 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(UnstableApi::class) @SuppressLint("CoroutineCreationDuringComposition", "NewApi")
 @Composable
-fun HomeScreen(context: Context){
-    val player = remember {
-        Player(context)
-    }
+fun HomeScreen(context: Context,player:Player){
+
+
 
     Surface(modifier = Modifier.fillMaxSize(),
         color = Background) {
@@ -195,7 +193,8 @@ fun HomeScreen(context: Context){
                             AlbumCard(
                                 title = it.child("Song_Name").value.toString(),
                                 image = it.child("cover_image").value.toString(),
-                                onClick = { player.onEvent(PlayerEvent.PlaySong(it)) })
+                                onClick = {
+                                    player.onEvent(PlayerEvent.PlaySong(it)) })
                         }
 
                     }
@@ -220,7 +219,14 @@ fun HomeScreen(context: Context){
                                 title = it.child("title").value.toString(),
                                 image = it.child("image").value.toString()
                             ) {
-
+                                scope.launch {
+                                    Router.navigateTo(
+                                        Screen.PlayListScreen,listOf(
+                                            it.key.toString(),
+                                            it.ref.parent?.key.toString()
+                                        )
+                                    ) { player.onEvent(PlayerEvent.SongPaused(false)) }
+                                }
                             }
 
                         }
@@ -252,11 +258,11 @@ fun HomeScreen(context: Context){
                             ) {
                                 scope.launch {
                                     Router.navigateTo(
-                                        Screen.PlayListScreen, listOf(
+                                        Screen.PlayListScreen,listOf(
                                             it.key.toString(),
                                             it.ref.parent?.key.toString()
                                         )
-                                    )
+                                    ) { player.onEvent(PlayerEvent.SongPaused(false)) }
                                 }
                             }
 
@@ -278,5 +284,5 @@ fun HomeScreen(context: Context){
 @Composable
 fun DefaultPreviewHomeScreen(){
 
-    HomeScreen(context= LocalContext.current.applicationContext)
+//    HomeScreen(context= LocalContext.current.applicationContext)
 }

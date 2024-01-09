@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.spotify_clone.musicPlayer.Player
+import com.example.spotify_clone.musicPlayer.PlayerEvent
 import com.example.spotify_clone.navigation.Router
 import com.example.spotify_clone.navigation.Screen
 import com.example.spotify_clone.ui.theme.Background
@@ -55,7 +56,11 @@ fun BottomNav(context: Context, player: Player) {
                     icon = { Icon(icons[index], contentDescription = item) },
                     label = { Text(item) },
                     selected = Router.currentScreen.value == screens[index],
-                    onClick = { Router.navigateTo(screens[index]) },
+                    onClick = { Router.navigateTo(screens[index], onClick = {
+                        player.onEvent(
+                            PlayerEvent.SongPaused(false)
+                        )
+                    }) },
                     modifier = Modifier.background(Color.Transparent),
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = Secondary,

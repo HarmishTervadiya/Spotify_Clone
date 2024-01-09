@@ -47,22 +47,22 @@ fun ContainerScreen(context: Context){
             ) { screen ->
                 when(screen){
                     is Screen.HomeScreen ->{
-                        HomeScreen(context=context)
+                        HomeScreen(context=context,player.value)
                     }
 
                     is Screen.SearchScreen ->{
-                        SearchScreen(context=context)
+                        SearchScreen(context=context,player.value)
                     }
 
                     is Screen.LibraryScreen ->{
-                        LibraryScreen(context=context)
+                        LibraryScreen(context=context,player.value)
                     }
 
                     is Screen.PlayListScreen ->{
-                        PlayListScreen(context=context )
+                        PlayListScreen(context=context,player.value)
                     }
                     else -> {
-                        HomeScreen(context)
+                        HomeScreen(context,player.value)
                     }
                 }
 

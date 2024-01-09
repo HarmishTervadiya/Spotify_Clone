@@ -7,6 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -152,8 +155,8 @@ fun NowPlayingBar(context: Context,player:Player,onCLick:()->Unit) {
         .height(70.dp)
         .clickable {
             onCLick.invoke()
-            showBottomSheet.value=true
-            scope.launch{
+            showBottomSheet.value = true
+            scope.launch {
             }
         }
         , containerColor = Color(0x3AD8D8D8),
@@ -235,3 +238,53 @@ fun NowPlayingBar(context: Context,player:Player,onCLick:()->Unit) {
 
     }
 
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ListItem(image:String,title:String,rank:String,likes:String,onClick: () -> Unit){
+
+    FlowRow(modifier = Modifier
+        .fillMaxWidth()
+        .height(70.dp)
+        .padding(4.dp)
+        .clickable { onClick.invoke() }
+    , verticalArrangement = Arrangement.Center, horizontalArrangement = Arrangement.Start
+        ) {
+
+        Text(modifier = Modifier
+            .width(50.dp)
+            .padding(4.dp)
+            .align(Alignment.CenterVertically)
+            ,text = rank, color = Color.White, fontSize = 15.sp, textAlign = TextAlign.Center)
+
+
+        AsyncImage(model = image, contentDescription = title, placeholder = painterResource(id = R.drawable.logo),
+            modifier = Modifier
+                .width(50.dp)
+                .padding(5.dp), contentScale = ContentScale.Crop)
+
+        Column(modifier = Modifier
+            .fillMaxHeight()
+            .fillMaxWidth()
+            .weight(1f)
+        ) {
+            Text(modifier = Modifier
+                .fillMaxSize()
+                .padding(5.dp)
+                .weight(1f)
+                ,text = title, color = Color.White, fontSize = 15.sp, textAlign =TextAlign.Start, maxLines = 3, softWrap = true )
+
+            Text(modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 5.dp)
+                .weight(1f)
+                ,text = "Likes : $likes", color = Color.White, fontSize = 12.sp, textAlign =TextAlign.Start, maxLines = 3, softWrap = true )
+        }
+
+        Icon(imageVector = Icons.Filled.List, contentDescription = "", modifier = Modifier
+            .width(30.dp)
+            .padding(4.dp)
+            .weight(.1f)
+            .align(Alignment.CenterVertically), tint = Color.White)
+    }
+}

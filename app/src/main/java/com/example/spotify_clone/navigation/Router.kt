@@ -21,7 +21,8 @@ object Router{
     var currentScreen: MutableState<Screen> = mutableStateOf(Screen.HomeScreen)
     var listId= mutableStateOf(listOf<String>())
 
-    fun navigateTo(destination:Screen,dataSnapshot:List<String> = listOf("","") ){
+    fun navigateTo(destination:Screen,dataSnapshot:List<String> = listOf("",""),onClick:()->Unit={}){
+        onClick.invoke()
         currentScreen.value=destination
         listId.value=dataSnapshot
     }

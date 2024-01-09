@@ -3,6 +3,7 @@ package com.example.spotify_clone.musicPlayer
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -13,7 +14,7 @@ import kotlin.math.abs
 
 sealed class PlayerEvent{
     data class SongPaused(val isPlaying: Boolean):PlayerEvent()
-    data class PlaylistPlay(val isPlaying: Boolean):PlayerEvent()
+    data class PlaylistPlay(val currentSong:DataSnapshot,val list:SnapshotStateList<DataSnapshot>):PlayerEvent()
     data class SongResumed(val isPlaying: Boolean):PlayerEvent()
     data class PlaySong(val currentSong:DataSnapshot):PlayerEvent()
 
@@ -37,8 +38,12 @@ class Player(context: Context) : ViewModel() {
     private val songViewModel=SongsViewModel(context)
 
 
-    private fun playSong() {
+    fun playerRelease(){
+        player.stop()
+        player.release()
+    }
 
+    private fun playSong() {
         val songList=songViewModel.Songs
         val list= mutableListOf<String>()
         songList.forEach {
@@ -86,13 +91,15 @@ class Player(context: Context) : ViewModel() {
                         player.addMediaItem(nextItemToPlay)
 
                     }
-
                 }
+
+
             })
 
+            if(!player.isPlaying) {
                 player.prepare()
                 player.play()
-
+            }
 
         }
 
@@ -106,9 +113,8 @@ class Player(context: Context) : ViewModel() {
         player.play()
     }
 
-
-
     fun onEvent(event: PlayerEvent) = when(event){
+
         is  PlayerEvent.SongPaused-> {
             pause()
             currentSongTrack.value = currentSongTrack.value.copy(
@@ -140,15 +146,85 @@ class Player(context: Context) : ViewModel() {
 
         }
 
-        else ->{
-            player.stop()
+        is PlayerEvent.PlaylistPlay->{
+
+            if(currentSongTrack.value.mediaItemId != event.currentSong.key.toString()) {
+                player.stop()
+                player.clearMediaItems()
+
+                currentSongTrack.value = currentSongTrack.value.copy(
+                    isPlaying = true,
+                    title = event.currentSong.child("Song_Name").value.toString(),
+                    image = event.currentSong.child("cover_image").value.toString(),
+                    songUri = event.currentSong.child("SongUri").value.toString(),
+                    mediaItemId = event.currentSong.key.toString()
+                )
+            }
+            playSongList(event.list)
         }
-
-
 
     }
 
+    private fun playSongList(list: SnapshotStateList<DataSnapshot>) {
+        player.stop()
+        player.clearMediaItems()
 
+        thread.run {
+
+            val currentItem = MediaItem.Builder().setMediaId(currentSongTrack.value.mediaItemId)
+                .setUri(currentSongTrack.value.songUri).build()
+            player.addMediaItem(currentItem)
+
+//            list.forEach {
+//                player.addMediaItem(MediaItem.Builder().setMediaId(it.key.toString()).setUri(it.child("SongUri").value.toString()).build())
+//            }
+
+            var randomIndex=1
+            if (randomIndex > list.lastIndex){
+                player.stop()
+                return
+            }
+
+            var nextItem = list[randomIndex]
+            var nextItemToPlay=MediaItem.Builder().setMediaId(nextItem.key.toString())
+                .setUri(nextItem.child("SongUri").value.toString()).build()
+
+            player.setMediaItem(nextItemToPlay)
+
+            player.addListener(object : Player.Listener{
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    Log.d("Call back successful","Call back Successful")
+                    super.onIsPlayingChanged(isPlaying)
+                }
+
+                override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+
+                    Log.d("Call back successful","Call back Successful ${mediaItem?.mediaId}")
+                    if (mediaItem?.mediaId!=currentSongTrack.value.mediaItemId) {
+                        currentSongTrack.value = currentSongTrack.value.copy(
+                            title = nextItem.child("Song_Name").value.toString(),
+                            image = nextItem.child("cover_image").value.toString(),
+                            songUri = nextItem.child("SongUri").value.toString(),
+                            mediaItemId = nextItem.key.toString()
+                        )
+
+                        randomIndex++
+                        nextItem = list[randomIndex]
+                        nextItemToPlay = MediaItem.Builder().setMediaId(nextItem.key.toString())
+                            .setUri(nextItem.child("SongUri").value.toString()).build()
+                        player.addMediaItem(nextItemToPlay)
+
+                    }
+
+                }
+            })
+
+            if(!player.isPlaying) {
+                player.prepare()
+                player.play()
+            }
+        }
+    }
 
 
 }

@@ -20,11 +20,11 @@ import com.example.spotify_clone.musicPlayer.Player
 import com.example.spotify_clone.ui.theme.Background
 
 @Composable
-fun SearchScreen(context:Context) {
+fun SearchScreen(context:Context,player: Player) {
 
-    val player = remember {
-        Player(context)
-    }
+//    val player = remember {
+//        Player(context)
+//    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),

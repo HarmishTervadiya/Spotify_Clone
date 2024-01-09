@@ -1,12 +1,15 @@
 package com.example.spotify_clone.data
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
-import com.example.spotify_clone.navigation.Router
-import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 
 data class ListRef(
@@ -17,49 +20,107 @@ data class ListRef(
 )
 
 class PlayListScreenViewModel : ViewModel() {
-    private val listRef = mutableStateOf(ListRef())
 
-    private val query = getQuery()
+    fun getArtist(Id: String): MutableState<ListRef> {
+        val value = mutableStateOf(ListRef())
+        val query = Firebase.database.reference.child("Artists").child(Id)
 
-    private fun getQuery(): Task<DataSnapshot> {
-        return if (Router.listId.value[1] == "Artists") {
-            Firebase.database.reference.child("Artists").child(Router.listId.value[0]).get()
-        } else if (Router.listId.value[1] == "Albums") {
-            Firebase.database.reference.child("Artists").child(Router.listId.value[0]).get()
-        } else if (Router.listId.value[1] == "Songs") {
-            Firebase.database.reference.child("Songs").child(Router.listId.value[0]).get()
-        } else {
-            Firebase.database.reference.child("Artists").child(Router.listId.value[0]).get()
-        }
+        query.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                value.value = value.value.copy(
+                    listName = snapshot.child("Artist_Name").value.toString(),
+                    listId = snapshot.key.toString(),
+                    playedCount = snapshot.child("played").value.toString(),
+                    listImage = snapshot.child("profile").value.toString()
+                )
+            }
 
+            override fun onCancelled(error: DatabaseError) {
+                // Handle onCancelled event if needed
+            }
+        })
 
+        return value
     }
 
-    fun getData(): ListRef {
-        query.addOnSuccessListener { data ->
-            listRef.value = listRef.value.copy(
-                listId = data.key.toString(),
-                listName = data.child("Artist_Name").value.toString(),
-                listImage = data.child("profile").value.toString(),
-                playedCount = data.child("played").value.toString()
-            )
+    fun getAlbums(Id: String): MutableState<ListRef> {
+        val value = mutableStateOf(ListRef())
+        val query = Firebase.database.reference.child("Albums").child(Id)
 
-//        listRef.value=listRef.value.copy(
-//            listId=data.key.toString(),
-//            listName=data.child("Artist_Name").value.toString(),
-//            listImage=data.child("profile").value.toString(),
-//            playedCount=data.child("played").value.toString()
-//        )
+        query.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                value.value = value.value.copy(
+                    listName = snapshot.child("title").value.toString(),
+                    listId = snapshot.key.toString(),
+                    playedCount = snapshot.child("played").value.toString(),
+                    listImage = snapshot.child("image").value.toString()
+                )
+            }
 
-        }
-        Log.d("Data Updated", listRef.value.toString())
-        return listRef.value
+            override fun onCancelled(error: DatabaseError) {
+                // Handle onCancelled event if needed
+            }
+        })
+
+        return value
     }
-//
-//    fun getData(): ListRef {
-//        Log.d("Data Updated",listRef.value.toString())
-//        return listRef.value
-//    }
 
+    fun getPlaylist(Id: String): MutableState<ListRef> {
+        val value = mutableStateOf(ListRef())
+        val query = Firebase.database.reference.child("Artists").child(Id)
+
+        query.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                value.value = value.value.copy(
+                    listName = snapshot.child("Artist_Name").value.toString(),
+                    listId = snapshot.key.toString(),
+                    playedCount = snapshot.child("played").value.toString(),
+                    listImage = snapshot.child("profile").value.toString()
+                )
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle onCancelled event if needed
+            }
+        })
+
+        return value
+    }
+
+    fun getSongList(ref:String,id:String): SnapshotStateList<DataSnapshot>
+    {
+        val arg= when (ref) {
+            "Artists" -> {
+                "ArtistId"
+            }
+            "Albums" -> {
+                "AlbumId"
+            }
+            else -> (
+                    "Genre"
+                    )
+        }
+        val value= mutableStateListOf<DataSnapshot>()
+        val query=Firebase.database.reference.child("Songs").orderByChild(arg).equalTo(id)
+
+        query.addValueEventListener(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                value.clear()
+                snapshot.children.forEach {
+                    it?.let{
+                        value.add(it)
+                    }
+
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.d("Songs Reading Failed",error.message)
+            }
+        })
+
+        Log.d("Song List",value.toList().toString())
+        return value
+    }
 
 }
