@@ -15,19 +15,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,14 +47,17 @@ import com.example.spotify_clone.musicPlayer.Player
 import com.example.spotify_clone.musicPlayer.PlayerEvent
 import com.example.spotify_clone.navigation.Router
 import com.example.spotify_clone.ui.theme.Background
+import kotlinx.coroutines.launch
 
 val listViewModel= PlayListScreenViewModel()
-val songList= listViewModel.getSongList(Router.listId.value[1],Router.listId.value[0])
+@SuppressLint("MutableCollectionMutableState")
 
 @OptIn(ExperimentalLayoutApi::class)
-@SuppressLint("UnrememberedMutableState", "MutableCollectionMutableState")
 @Composable
 fun PlayListScreen(context:Context,player: Player){
+    val songList= remember{
+        mutableStateOf(listViewModel.getSongList(Router.listId.value[1], Router.listId.value[0]))
+    }
 
 
     val listRef=if (Router.listId.value[1] == "Artists") {
@@ -67,10 +72,8 @@ fun PlayListScreen(context:Context,player: Player){
     } else {
         listViewModel.getArtist(Router.listId.value[0])
     }
-//
-//    val player = remember {
-//        Player(context)
-//    }
+
+    val scope= rememberCoroutineScope()
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -145,27 +148,34 @@ fun PlayListScreen(context:Context,player: Player){
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Bold
                         )
-                        ElevatedButton(
-                            onClick = { },
-                            shape = CircleShape,
+
+
+                        IconButton(onClick = {
+                            scope.launch {
+                                player.onEvent(PlayerEvent.PlaylistPlay(currentSong = songList.value.first(),list= songList.value))
+                            }
+                            },
                             modifier = Modifier
                                 .fillMaxHeight()
                                 .width(60.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                        ) {
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = Color.Red,
+                                contentColor = Color.White
+                            )
+                            ) {
                             Icon(
                                 imageVector = Icons.Filled.PlayArrow,
                                 contentDescription = "Play All",
-                                modifier = Modifier.fillMaxSize()
-                            )
+                                )
                         }
+
                     }
 
 
                     Spacer(modifier = Modifier.height(10.dp))
                     var num = 0
 
-                    songList.map {
+                    songList.value.map {
                         num++
                         ListItem(
                             image = it.child("cover_image").value.toString(),
@@ -173,8 +183,9 @@ fun PlayListScreen(context:Context,player: Player){
                             rank = num.toString(),
                             likes = it.child("Likes").value.toString()
                         ){
+
                             player.onEvent(PlayerEvent.SongPaused(true))
-                            player.onEvent(PlayerEvent.PlaylistPlay(currentSong = it,list= songList))
+                            player.onEvent(PlayerEvent.PlaylistPlay(currentSong = it,list= songList.value))
                         }
 
                     }

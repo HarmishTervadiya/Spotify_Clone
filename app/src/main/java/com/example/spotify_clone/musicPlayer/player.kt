@@ -30,18 +30,14 @@ data class SongTrack(
     var mediaItemId:String=""
 
 )
+
+val currentSongTrack = mutableStateOf(SongTrack())
+
 class Player(context: Context) : ViewModel() {
-
-    private val player = ExoPlayer.Builder(context).build()
-    val currentSongTrack = mutableStateOf(SongTrack())
+    val player = ExoPlayer.Builder(context).build()
     private val thread = Thread()
-    private val songViewModel=SongsViewModel(context)
+    private val songViewModel=SongsViewModel()
 
-
-    fun playerRelease(){
-        player.stop()
-        player.release()
-    }
 
     private fun playSong() {
         val songList=songViewModel.Songs
@@ -173,23 +169,25 @@ class Player(context: Context) : ViewModel() {
 
             val currentItem = MediaItem.Builder().setMediaId(currentSongTrack.value.mediaItemId)
                 .setUri(currentSongTrack.value.songUri).build()
-            player.addMediaItem(currentItem)
+            player.setMediaItem(currentItem)
 
-//            list.forEach {
-//                player.addMediaItem(MediaItem.Builder().setMediaId(it.key.toString()).setUri(it.child("SongUri").value.toString()).build())
-//            }
+
 
             var randomIndex=1
             if (randomIndex > list.lastIndex){
                 player.stop()
                 return
             }
-
             var nextItem = list[randomIndex]
             var nextItemToPlay=MediaItem.Builder().setMediaId(nextItem.key.toString())
                 .setUri(nextItem.child("SongUri").value.toString()).build()
 
-            player.setMediaItem(nextItemToPlay)
+            if (randomIndex > list.lastIndex){
+                player.stop()
+                return
+            }else{
+                player.addMediaItem(nextItemToPlay)
+            }
 
             player.addListener(object : Player.Listener{
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -209,11 +207,14 @@ class Player(context: Context) : ViewModel() {
                         )
 
                         randomIndex++
-                        nextItem = list[randomIndex]
-                        nextItemToPlay = MediaItem.Builder().setMediaId(nextItem.key.toString())
-                            .setUri(nextItem.child("SongUri").value.toString()).build()
-                        player.addMediaItem(nextItemToPlay)
-
+                        if (randomIndex>list.lastIndex){
+                            return
+                        }else {
+                            nextItem = list[randomIndex]
+                            nextItemToPlay = MediaItem.Builder().setMediaId(nextItem.key.toString())
+                                .setUri(nextItem.child("SongUri").value.toString()).build()
+                            player.addMediaItem(nextItemToPlay)
+                        }
                     }
 
                 }

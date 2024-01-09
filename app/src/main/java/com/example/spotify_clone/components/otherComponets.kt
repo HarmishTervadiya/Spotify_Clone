@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.spotify_clone.components
 
 import android.annotation.SuppressLint
@@ -17,9 +19,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -27,7 +32,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -38,8 +45,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,7 +57,9 @@ import coil.compose.AsyncImage
 import com.example.spotify_clone.R
 import com.example.spotify_clone.musicPlayer.Player
 import com.example.spotify_clone.musicPlayer.PlayerEvent
+import com.example.spotify_clone.musicPlayer.currentSongTrack
 import com.example.spotify_clone.ui.theme.Background
+import com.example.spotify_clone.ui.theme.Secondary
 import kotlinx.coroutines.launch
 
 @Composable
@@ -145,7 +157,8 @@ fun AlbumCard(title:String, image: String, onClick:()->Unit){
 fun NowPlayingBar(context: Context,player:Player,onCLick:()->Unit) {
 
 
-    val track=mutableStateOf(player.currentSongTrack.value)
+
+    val track=mutableStateOf(currentSongTrack.value)
     var showBottomSheet = remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
@@ -251,12 +264,18 @@ fun ListItem(image:String,title:String,rank:String,likes:String,onClick: () -> U
     , verticalArrangement = Arrangement.Center, horizontalArrangement = Arrangement.Start
         ) {
 
-        Text(modifier = Modifier
-            .width(50.dp)
-            .padding(4.dp)
-            .align(Alignment.CenterVertically)
-            ,text = rank, color = Color.White, fontSize = 15.sp, textAlign = TextAlign.Center)
-
+        if (rank!="") {
+            Text(
+                modifier = Modifier
+                    .width(50.dp)
+                    .padding(4.dp)
+                    .align(Alignment.CenterVertically),
+                text = rank,
+                color = Color.White,
+                fontSize = 15.sp,
+                textAlign = TextAlign.Center
+            )
+        }
 
         AsyncImage(model = image, contentDescription = title, placeholder = painterResource(id = R.drawable.logo),
             modifier = Modifier
@@ -287,4 +306,38 @@ fun ListItem(image:String,title:String,rank:String,likes:String,onClick: () -> U
             .weight(.1f)
             .align(Alignment.CenterVertically), tint = Color.White)
     }
+}
+
+
+@Composable
+fun SearchBarInput(onChange:(String)->Unit){
+    IndicatorText(value = "Search", textColor = Color.White, align = TextAlign.Start)
+    val search= remember { mutableStateOf("") }
+    val localFocus= LocalFocusManager.current
+    OutlinedTextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp),
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = Color.LightGray,
+            cursorColor = Secondary,
+            containerColor = Color.White
+        ),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done
+        ),
+        singleLine = true,
+        maxLines = 1,
+        keyboardActions = KeyboardActions {
+            localFocus.clearFocus()
+        },
+        value = search.value,
+        onValueChange = {
+            search.value = it
+            onChange.invoke(it)
+        },
+        leadingIcon = {
+            Icon(imageVector = Icons.Filled.Search, contentDescription = "Search")
+        })
 }

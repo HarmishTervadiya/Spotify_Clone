@@ -1,9 +1,7 @@
 package com.example.spotify_clone.data.Firebase
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import com.google.firebase.Firebase
@@ -12,13 +10,13 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 
-class SongsViewModel(context:Context) :ViewModel() {
+class SongsViewModel :ViewModel() {
 
-    val database= Firebase.database.reference.child("Songs").ref
+    private val database= Firebase.database.reference.child("Songs").ref
     val value= mutableStateListOf<DataSnapshot>()
     val Songs= getAllSongs()
 
-    fun getAllSongs(): SnapshotStateList<DataSnapshot>
+    private fun getAllSongs(): SnapshotStateList<DataSnapshot>
     {
         val value= mutableStateListOf<DataSnapshot>()
         database.addValueEventListener(object: ValueEventListener {
@@ -65,18 +63,17 @@ class SongsViewModel(context:Context) :ViewModel() {
         return value
     }
 
-    fun getNextSong() {
 
+    fun searchSong(query:String): SnapshotStateList<DataSnapshot> {
         val value= mutableStateListOf<DataSnapshot>()
-
-        val query=database.orderByChild("Likes")
-        query.addValueEventListener(object: ValueEventListener {
+        val dbQuery=Firebase.database.reference.child("Songs").orderByChild("Song_Name").startAt(query).endAt(query.lowercase()+"\uf8ff")
+        dbQuery.addValueEventListener(object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                value.clear()
                 snapshot.children.forEach {
                     it?.let{
                         value.add(it)
                     }
+
                 }
             }
 
@@ -85,17 +82,8 @@ class SongsViewModel(context:Context) :ViewModel() {
             }
 
         })
-        var temp= mutableStateOf("")
-        value.forEach {
-            temp.value=it.child("Song_Name").value.toString()
-        }
-        Log.d("data",
-           "Hello ${temp.value}"
-        )
-//        var randomIndex=(0 until abs(value.lastIndex).inc()).random()
-//        Log.d("Sizze",randomIndex.toString())
-//        Log.d("Random Number",value[randomIndex].value.toString())
 
+        return value
     }
 
 

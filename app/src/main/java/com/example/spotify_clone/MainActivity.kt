@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+
 class MainActivity : ComponentActivity() {
     val auth=FirebaseAuth.getInstance()
 
@@ -76,40 +77,6 @@ class MainActivity : ComponentActivity() {
 
 
 
-
-//@Composable
-//fun MainScreen(context: Context) {
-//    Scaffold(
-//        containerColor = Background,
-//        bottomBar = { BottomNav(context = context) },
-//        contentColor = Background
-//        // Place BottomNav within the Scaffold's bottomBar
-//    ) { innerPadding ->
-//        Column(
-//            modifier = Modifier
-//                .padding(innerPadding)
-//                .background(Background),
-//            // Apply Scaffold's inner padding
-//        ) {
-//
-//            // Screens to be displayed
-//            Surface(
-//                modifier = Modifier.fillMaxSize(),
-//                color = Background
-//            ) {
-//                Column(
-//                    modifier = Modifier.fillMaxSize(),
-//                ) {
-//                    Text(text = "Hello Everyone")
-//                }
-//            }
-//
-//
-//
-//
-//        }
-//    }
-//}
 @Preview
 @Composable
 fun DefaultPreviewMainScreen(){

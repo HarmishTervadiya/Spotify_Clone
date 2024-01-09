@@ -183,7 +183,7 @@ fun HomeScreen(context: Context,player:Player){
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    val topPicks = SongsViewModel(context).getTopSongs()
+                    val topPicks = SongsViewModel().getTopSongs()
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         userScrollEnabled = true,
