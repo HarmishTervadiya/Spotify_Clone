@@ -16,14 +16,16 @@ data class ListRef(
     var listId:String="Something",
     var listName:String="",
     var listImage:String="",
-    var playedCount:String=""
+    var playedCount:String="",
+    var listOfSongId: MutableList<String> = mutableListOf("")
 )
 
+val idList = mutableStateListOf<String>()
 class PlayListScreenViewModel : ViewModel() {
 
-    fun getArtist(Id: String): MutableState<ListRef> {
+    fun getArtist(id: String): MutableState<ListRef> {
         val value = mutableStateOf(ListRef())
-        val query = Firebase.database.reference.child("Artists").child(Id)
+        val query = Firebase.database.reference.child("Artists").child(id)
 
         query.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -43,9 +45,9 @@ class PlayListScreenViewModel : ViewModel() {
         return value
     }
 
-    fun getAlbums(Id: String): MutableState<ListRef> {
+    fun getAlbums(id: String): MutableState<ListRef> {
         val value = mutableStateOf(ListRef())
-        val query = Firebase.database.reference.child("Albums").child(Id)
+        val query = Firebase.database.reference.child("Albums").child(id)
 
         query.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -65,9 +67,39 @@ class PlayListScreenViewModel : ViewModel() {
         return value
     }
 
-    fun getPlaylist(Id: String): MutableState<ListRef> {
+    fun getUserPlaylistRef(id: String): MutableState<ListRef> {
         val value = mutableStateOf(ListRef())
-        val query = Firebase.database.reference.child("Artists").child(Id)
+        val query = Firebase.database.reference.child("Playlists").child(id)
+
+        query.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                snapshot.child("listOfSongId").children.forEach {
+                    it?.let{
+                       idList.add(it.value.toString())
+//                        Log.d("List of songs",it.value.toString())
+                    }
+                }
+
+
+                value.value = value.value.copy(
+                    listName = snapshot.child("listName").value.toString(),
+                    listId = snapshot.key.toString(),
+                    listImage = snapshot.child("cover_image").value.toString(),
+                    listOfSongId =idList
+                )
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle onCancelled event if needed
+            }
+        })
+
+        return value
+    }
+
+    fun getPlaylist(id: String): MutableState<ListRef> {
+        val value = mutableStateOf(ListRef())
+        val query = Firebase.database.reference.child("Artists").child(id)
 
         query.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -120,6 +152,22 @@ class PlayListScreenViewModel : ViewModel() {
         })
 
         Log.d("Song List",value.toList().toString())
+        return value
+    }
+
+
+    fun getUserPlayList(listOfSongId: List<String>): SnapshotStateList<DataSnapshot>
+    {
+        val value= mutableStateListOf<DataSnapshot>()
+        allSongs.forEach {
+            it.let {
+                if (listOfSongId.contains(it.key.toString())){
+                    value.add(it)
+                }
+            }
+        }
+
+        Log.d("Song List", "Hello${value.toList()}")
         return value
     }
 

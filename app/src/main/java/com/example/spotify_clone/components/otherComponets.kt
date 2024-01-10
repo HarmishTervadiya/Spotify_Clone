@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 
 package com.example.spotify_clone.components
 
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,18 +23,23 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -53,8 +59,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.example.spotify_clone.R
+import com.example.spotify_clone.data.LibraryScreenViewModel
 import com.example.spotify_clone.musicPlayer.Player
 import com.example.spotify_clone.musicPlayer.PlayerEvent
 import com.example.spotify_clone.musicPlayer.currentSongTrack
@@ -308,6 +317,48 @@ fun ListItem(image:String,title:String,rank:String,likes:String,onClick: () -> U
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun PlaylistRow(image:String,title:String,songs:String,onClick: () -> Unit){
+    FlowRow(modifier = Modifier
+        .fillMaxWidth()
+        .height(70.dp)
+        .padding(4.dp)
+        .clickable { onClick.invoke() }
+        , verticalArrangement = Arrangement.Center, horizontalArrangement = Arrangement.Start
+    ) {
+
+        AsyncImage(model = image, contentDescription = title, placeholder = painterResource(id = R.drawable.logo),
+            modifier = Modifier
+                .width(70.dp)
+                .padding(5.dp), contentScale = ContentScale.Crop)
+
+        Column(modifier = Modifier
+            .fillMaxHeight()
+            .fillMaxWidth()
+            .weight(1f)
+        ) {
+            Text(modifier = Modifier
+                .fillMaxSize()
+                .padding(5.dp)
+                .weight(1f)
+                ,text = title, color = Color.White, fontSize = 15.sp, textAlign =TextAlign.Start, maxLines = 3, softWrap = true )
+
+            Text(modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 5.dp)
+                .weight(1f)
+                ,text = "Songs : $songs", color = Color.White, fontSize = 12.sp, textAlign =TextAlign.Start, maxLines = 3, softWrap = true )
+        }
+
+        Icon(imageVector = Icons.Filled.Delete, contentDescription = "Delete", modifier = Modifier
+            .width(30.dp)
+            .padding(4.dp)
+            .weight(.1f)
+            .align(Alignment.CenterVertically), tint = Color.White)
+    }
+}
+
 
 @Composable
 fun SearchBarInput(onChange:(String)->Unit){
@@ -340,4 +391,57 @@ fun SearchBarInput(onChange:(String)->Unit){
         leadingIcon = {
             Icon(imageVector = Icons.Filled.Search, contentDescription = "Search")
         })
+}
+
+
+
+@Composable
+fun CreatePlaylistDialog(onDismissRequest:()->Unit,onConfirm:(String)->Unit){
+    val value= remember {
+        mutableStateOf("")
+    }
+    Dialog(onDismissRequest = { onDismissRequest.invoke() }, properties = DialogProperties(dismissOnBackPress = true,dismissOnClickOutside = true)) {
+        ElevatedCard(modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp),
+            shape = CardDefaults.elevatedShape,
+            colors = CardDefaults.cardColors(
+                containerColor = Color.DarkGray
+            )) {
+
+            Spacer(modifier = Modifier.height(10.dp))
+            IndicatorText(value = "Give your playlist a name", textColor = Color.White, align = TextAlign.Center )
+
+            TextField(value = value.value, onValueChange = {
+                value.value=it
+            }, modifier = Modifier
+                .fillMaxWidth()
+                .padding(17.dp)
+                .background(Color.Transparent),
+                colors = TextFieldDefaults.colors(
+                    unfocusedContainerColor = Color.LightGray,
+                    focusedTextColor = Color.Black
+                ))
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(text = LibraryScreenViewModel().newPlaylistName.value)
+
+            FlowRow(modifier = Modifier
+                .fillMaxWidth()
+                .padding(5.dp), verticalArrangement = Arrangement.Center, horizontalArrangement = Arrangement.SpaceAround) {
+
+                ElevatedButton(onClick = { onDismissRequest.invoke() }) {
+                    Text(text = "Cancel")
+                }
+
+                ElevatedButton(onClick = { onConfirm.invoke(value.value) }, colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Red
+                )) {
+                    Text(text = "Create")
+                }
+            }
+        }
+
+    }
 }

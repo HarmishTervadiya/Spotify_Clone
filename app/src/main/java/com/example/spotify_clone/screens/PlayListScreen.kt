@@ -43,6 +43,7 @@ import com.example.spotify_clone.components.IndicatorText
 import com.example.spotify_clone.components.ListItem
 import com.example.spotify_clone.components.NowPlayingBar
 import com.example.spotify_clone.data.PlayListScreenViewModel
+import com.example.spotify_clone.data.idList
 import com.example.spotify_clone.musicPlayer.Player
 import com.example.spotify_clone.musicPlayer.PlayerEvent
 import com.example.spotify_clone.navigation.Router
@@ -55,23 +56,28 @@ val listViewModel= PlayListScreenViewModel()
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PlayListScreen(context:Context,player: Player){
-    val songList= remember{
-        mutableStateOf(listViewModel.getSongList(Router.listId.value[1], Router.listId.value[0]))
+    val listRef= remember {
+        if (Router.listId.value[1] == "Artists") {
+            listViewModel.getArtist(Router.listId.value[0])
+
+        } else if (Router.listId.value[1] == "Albums") {
+            listViewModel.getAlbums(Router.listId.value[0])
+
+        } else if (Router.listId.value[1] == "Songs") {
+            listViewModel.getPlaylist(Router.listId.value[0])
+
+        } else if (Router.listId.value[1] == "Playlists") {
+            listViewModel.getUserPlaylistRef(Router.listId.value[0])
+
+        } else {
+            listViewModel.getArtist(Router.listId.value[0])
+        }
     }
 
 
-    val listRef=if (Router.listId.value[1] == "Artists") {
-        listViewModel.getArtist(Router.listId.value[0])
+//Log.d("List of songs",listRef.value.listOfSongId.toString())
 
-    } else if (Router.listId.value[1] == "Albums") {
-        listViewModel.getAlbums(Router.listId.value[0])
 
-    } else if (Router.listId.value[1] == "Songs") {
-        listViewModel.getPlaylist(Router.listId.value[0])
-
-    } else {
-        listViewModel.getArtist(Router.listId.value[0])
-    }
 
     val scope= rememberCoroutineScope()
 
@@ -93,8 +99,6 @@ fun PlayListScreen(context:Context,player: Player){
                     .padding(innerPadding)
                     .padding(8.dp)
             ) {
-
-
 
 
 
@@ -132,6 +136,24 @@ fun PlayListScreen(context:Context,player: Player){
                         textColor = Color.White,
                         align = TextAlign.Center
                     )
+
+                    val songList =if (Router.listId.value[1] == "Playlists") {
+                        remember {
+                            mutableStateOf(
+                                listViewModel.getUserPlayList(idList.toList())
+                            )
+                        }
+                    }else {
+                        remember {
+                            mutableStateOf(
+                                listViewModel.getSongList(
+                                    Router.listId.value[1],
+                                    Router.listId.value[0]
+                                )
+                            )
+                        }
+
+                    }
 
                     FlowRow(
                         modifier = Modifier

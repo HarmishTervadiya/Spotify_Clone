@@ -18,7 +18,7 @@ sealed class Screen {
 }
 
 object Router{
-    var currentScreen: MutableState<Screen> = mutableStateOf(Screen.HomeScreen)
+    var currentScreen: MutableState<Screen> = mutableStateOf(Screen.RegisterScreen)
     var listId= mutableStateOf(listOf<String>())
 
     fun navigateTo(destination:Screen,dataSnapshot:List<String> = listOf("",""),onClick:()->Unit={}){
