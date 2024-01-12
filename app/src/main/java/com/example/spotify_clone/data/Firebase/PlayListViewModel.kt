@@ -59,6 +59,7 @@ class PlayListViewModel {
             }
         }
 
+
         return res.value
 
     }
@@ -84,6 +85,32 @@ class PlayListViewModel {
         Log.d("Failed",list.toList().toString())
         return list
     }
+
+    fun removePlaylist(playlistId: String): Boolean {
+        val result= mutableStateOf(false)
+        db.child(playlistId).removeValue()
+            .addOnSuccessListener {
+                result.value=true
+            }
+            .addOnFailureListener {
+                result.value=false
+                Log.d("Delete Failed",it.message.toString())
+            }
+        return result.value
+    }
+
+    fun pushToPlaylist(listId: String, songId: MutableList<String>) {
+        db.child(listId).child("cover_image").setValue(songId.last())
+        db.child(listId).child("listOfSongId").push().setValue(songId.first())
+            .addOnSuccessListener {
+                Log.d("Success","Added SuccessFully")
+            }
+            .addOnFailureListener {
+                Log.d("Failed",it.message.toString())
+            }
+    }
+
+
 }
 
 data class PlayList(

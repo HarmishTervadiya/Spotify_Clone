@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 
@@ -86,6 +87,8 @@ class SongsViewModel :ViewModel() {
         return value
     }
 
-
+    fun songLike(id: String) {
+        database.child(id).child("Likes").setValue(ServerValue.increment(1))
+    }
 
 }

@@ -20,10 +20,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
@@ -31,6 +35,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +43,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -168,7 +174,7 @@ fun NowPlayingBar(context: Context,player:Player,onCLick:()->Unit) {
 
 
     val track=mutableStateOf(currentSongTrack.value)
-    var showBottomSheet = remember { mutableStateOf(false) }
+    val showBottomSheet = remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
@@ -263,7 +269,7 @@ fun NowPlayingBar(context: Context,player:Player,onCLick:()->Unit) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ListItem(image:String,title:String,rank:String,likes:String,onClick: () -> Unit){
+fun ListItem(image:String,title:String,rank:String,likes:String,onOptionClick:()->Unit,onClick: () -> Unit){
 
     FlowRow(modifier = Modifier
         .fillMaxWidth()
@@ -313,13 +319,15 @@ fun ListItem(image:String,title:String,rank:String,likes:String,onClick: () -> U
             .width(30.dp)
             .padding(4.dp)
             .weight(.1f)
+            .clickable { onOptionClick.invoke() }
             .align(Alignment.CenterVertically), tint = Color.White)
+
     }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun PlaylistRow(image:String,title:String,songs:String,onClick: () -> Unit){
+fun PlaylistRow(image:String,title:String,songs:String,onDelete:(String)->Unit,id:String,onClick: () -> Unit){
     FlowRow(modifier = Modifier
         .fillMaxWidth()
         .height(70.dp)
@@ -353,6 +361,9 @@ fun PlaylistRow(image:String,title:String,songs:String,onClick: () -> Unit){
 
         Icon(imageVector = Icons.Filled.Delete, contentDescription = "Delete", modifier = Modifier
             .width(30.dp)
+            .clickable {
+                onDelete.invoke(id)
+            }
             .padding(4.dp)
             .weight(.1f)
             .align(Alignment.CenterVertically), tint = Color.White)
@@ -369,10 +380,12 @@ fun SearchBarInput(onChange:(String)->Unit){
         modifier = Modifier
             .fillMaxWidth()
             .padding(2.dp),
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedBorderColor = Color.LightGray,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
+            disabledContainerColor = Color.White,
             cursorColor = Secondary,
-            containerColor = Color.White
+            focusedBorderColor = Color.LightGray,
         ),
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Password,
@@ -443,5 +456,95 @@ fun CreatePlaylistDialog(onDismissRequest:()->Unit,onConfirm:(String)->Unit){
             }
         }
 
+    }
+}
+
+
+@Composable
+fun MessageDialog(message: String){
+//    val value= remember {
+//        mutableStateOf("")
+//    }
+    Dialog(onDismissRequest = {  }, properties = DialogProperties(dismissOnBackPress = true,dismissOnClickOutside = true)) {
+        ElevatedCard(modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp),
+            shape = CardDefaults.elevatedShape,
+            colors = CardDefaults.cardColors(
+                containerColor = Color.DarkGray
+            )) {
+
+            Spacer(modifier = Modifier.height(10.dp))
+            TextField(value = message, onValueChange = {
+            }, modifier = Modifier
+                .fillMaxWidth()
+//                .padding(17.dp)
+                .background(Color.Transparent),
+                colors = TextFieldDefaults.colors(
+                    unfocusedContainerColor = Color.LightGray,
+                    focusedTextColor = Color.Black
+                ), readOnly = true)
+
+
+        }
+
+    }
+}
+
+
+@Composable
+fun SongOptionMenu(data: MutableList<String>, onDismissRequest: () -> Unit){
+    val viewModel= remember {
+        LibraryScreenViewModel()
+    }
+
+    val scope= rememberCoroutineScope()
+    val playlists= remember {
+        viewModel.listOfPlaylists
+    }
+
+    viewModel.refreshList()
+    ModalBottomSheet(onDismissRequest = { onDismissRequest.invoke() },
+        sheetState = rememberModalBottomSheetState(),
+        containerColor = Background) {
+
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())) {
+            FlowRow(modifier = Modifier
+                .fillMaxWidth()
+                .clickable { viewModel.addLike(data.first()) }
+                .padding(horizontal = 15.dp), verticalArrangement = Arrangement.Center, horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = "Like", color = Color.White, fontSize = 25.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(20.dp))
+                Icon(imageVector = Icons.Filled.Favorite, contentDescription = "Like", tint = Color.Red, modifier = Modifier
+                    .padding(20.dp)
+                    .align(Alignment.CenterVertically))
+            }
+
+            Text(text = "Add to Playlist", color = Color.White, fontSize = 25.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 35.dp))
+
+            playlists.value.map { list->
+                Divider(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 25.dp, vertical = 10.dp))
+                FlowRow(modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        viewModel.addToPlaylist(listId = list.key.toString(), songId = data)
+                        viewModel.refreshList()
+                        onDismissRequest.invoke()
+                    }
+                    .padding(horizontal = 15.dp), verticalArrangement = Arrangement.Center, horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(text =list.child("listName").value.toString() , color = Color.White, fontSize = 25.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 20.dp))
+                    Icon(imageVector = Icons.Filled.Add, contentDescription = "Like", tint = Color.Red, modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .align(Alignment.CenterVertically))
+                }
+            }
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+
+        }
     }
 }

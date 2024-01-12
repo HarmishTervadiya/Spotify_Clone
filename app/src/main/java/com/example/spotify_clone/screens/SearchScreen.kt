@@ -78,7 +78,8 @@ fun SearchScreen(context:Context,player: Player) {
                             image = item.child("cover_image").value.toString(),
                             title = item.child("Song_Name").value.toString(),
                             rank = "",
-                            likes = item.child("Likes").value.toString()
+                            likes = item.child("Likes").value.toString(),
+                            onOptionClick = { }
                         ) {
                             scope.launch {
                                 player.onEvent(PlayerEvent.PlaySong(item))

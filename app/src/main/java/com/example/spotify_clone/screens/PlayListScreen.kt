@@ -42,6 +42,7 @@ import coil.compose.AsyncImage
 import com.example.spotify_clone.components.IndicatorText
 import com.example.spotify_clone.components.ListItem
 import com.example.spotify_clone.components.NowPlayingBar
+import com.example.spotify_clone.components.SongOptionMenu
 import com.example.spotify_clone.data.PlayListScreenViewModel
 import com.example.spotify_clone.data.idList
 import com.example.spotify_clone.musicPlayer.Player
@@ -74,7 +75,13 @@ fun PlayListScreen(context:Context,player: Player){
         }
     }
 
+    val showContextMenu= remember {
+        mutableStateOf(false)
+    }
 
+    val currentItem= remember {
+        mutableListOf("")
+    }
 //Log.d("List of songs",listRef.value.listOfSongId.toString())
 
 
@@ -203,9 +210,12 @@ fun PlayListScreen(context:Context,player: Player){
                             image = it.child("cover_image").value.toString(),
                             title = it.child("Song_Name").value.toString(),
                             rank = num.toString(),
-                            likes = it.child("Likes").value.toString()
+                            likes = it.child("Likes").value.toString(),
+                            onOptionClick = {
+                                currentItem.add(it.key.toString())
+                                currentItem.add(it.child("cover_image").value.toString())
+                                showContextMenu.value=true }
                         ){
-
                             player.onEvent(PlayerEvent.SongPaused(true))
                             player.onEvent(PlayerEvent.PlaylistPlay(currentSong = it,list= songList.value))
                         }
@@ -213,6 +223,11 @@ fun PlayListScreen(context:Context,player: Player){
                     }
                 }
 
+                if (showContextMenu.value){
+                    SongOptionMenu(data = currentItem) {
+                        showContextMenu.value=false
+                    }
+                }
 
 
             }

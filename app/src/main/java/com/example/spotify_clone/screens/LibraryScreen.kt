@@ -17,8 +17,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
@@ -57,15 +57,14 @@ fun LibraryScreen(context: Context,player: Player) {
     val openDialog= remember {
         mutableStateOf(false)
     }
-    val playlists= remember {
-        viewModel.listOfPlaylists
-    }
-
     viewModel.refreshList()
+
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Background
     ) {
+
 
         var showBottomSheet = remember { mutableStateOf(true) }
         val scope = rememberCoroutineScope()
@@ -94,6 +93,8 @@ fun LibraryScreen(context: Context,player: Player) {
                 )
                 {
 
+                    viewModel.refreshList()
+
                     FlowRow(modifier = Modifier
                         .fillMaxWidth()
                         .padding(5.dp), verticalArrangement = Arrangement.Center, horizontalArrangement = Arrangement.SpaceBetween) {
@@ -118,16 +119,18 @@ fun LibraryScreen(context: Context,player: Player) {
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 7.dp)
                     )
-
+                    val playlists= remember {
+                        viewModel.listOfPlaylists
+                    }
                     Spacer(modifier = Modifier.height(10.dp))
-                    Column(
-                        modifier = Modifier
-                            .verticalScroll(rememberScrollState())
-                    )
-                    {
-                        
-                        playlists.value.forEach {list->
-                            PlaylistRow(image = list.child("cover_image").value.toString(), title = list.child("listName").value.toString(),songs =list.child("listOfSongId").children.count().toString() ) {
+                    LazyColumn{
+                        items(playlists.value){list->
+                            PlaylistRow(image = list.child("cover_image").value.toString(), title = list.child("listName").value.toString(),songs =list.child("listOfSongId").children.count().toString(),id=list.key.toString(),onDelete={
+                                scope.launch{
+                                    viewModel.deletePlaylist(it)
+                                    viewModel.refreshList()
+                                }
+                            } ) {
                                 scope.launch {
                                     Router.navigateTo(
                                         Screen.PlayListScreen,listOf(
@@ -138,13 +141,14 @@ fun LibraryScreen(context: Context,player: Player) {
                                 }
                             }
                         }
-
                     }
+
                 }
 
                 when{
                     openDialog.value ->{
                         CreatePlaylistDialog(onDismissRequest = { openDialog.value=false }, onConfirm = { viewModel.createPlaylist(it)
+                            viewModel.refreshList()
                         openDialog.value=false })
                     }
                 }
