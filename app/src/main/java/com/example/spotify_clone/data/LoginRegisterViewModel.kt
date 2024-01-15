@@ -3,8 +3,10 @@ package com.example.spotify_clone.data
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.spotify_clone.isServerMessage
 import com.example.spotify_clone.navigation.Router
 import com.example.spotify_clone.navigation.Screen
+import com.example.spotify_clone.serverMessage
 import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.auth
@@ -176,27 +178,39 @@ class LoginRegisterViewModel : ViewModel() {
         registerValidation.value=( (!registrationUIState.value.emailError) && (!registrationUIState.value.passwordError) && (!registrationUIState.value.nameError) )
     }
     private fun logIn(email: String, password: String) {
-
-        auth.signInWithEmailAndPassword(email,password)
-            .addOnCompleteListener {
-                if(it.isSuccessful){
-                    progress.value=false
-                    Router.navigateTo(Screen.HomeScreen)
-                }else{
-                    progress.value=false
-                    errorMessage.value=true
-                    Log.d("Complete","Complete $it")
+        if (email.isNullOrBlank() || password.isNullOrBlank()){
+            isServerMessage.value=true
+            serverMessage.value="Enter Email or Password again"
+        }else {
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        progress.value = false
+                        isServerMessage.value = true
+                        serverMessage.value = "Login Successful"
+                        Router.navigateTo(Screen.HomeScreen)
+                    } else {
+                        progress.value = false
+                        errorMessage.value = true
+                        Log.d("Complete", "Complete $it")
+                        isServerMessage.value = true
+                        serverMessage.value = "Invalid Email or Password"
+                    }
                 }
-            }
-            .addOnFailureListener {
-                progress.value=false
-                Log.d("Failure","Failure $it")
-                errorMessage.value=true
-            }
+                .addOnFailureListener {
+                    progress.value = false
+                    isServerMessage.value = true
+                    serverMessage.value = "Invalid Email or Password"
+                    Log.d("Failure", "Failure $it")
+                    errorMessage.value = true
+                }
+        }
     }
 
     fun logout(){
         auth.signOut()
+        isServerMessage.value=true
+        serverMessage.value="Logout Successful"
         Router.navigateTo(Screen.RegisterScreen)
     }
 

@@ -461,27 +461,26 @@ fun CreatePlaylistDialog(onDismissRequest:()->Unit,onConfirm:(String)->Unit){
 
 
 @Composable
-fun MessageDialog(message: String){
+fun MessageDialog(message: String,onDismissRequest: () -> Unit){
 //    val value= remember {
 //        mutableStateOf("")
 //    }
-    Dialog(onDismissRequest = {  }, properties = DialogProperties(dismissOnBackPress = true,dismissOnClickOutside = true)) {
+    Dialog(onDismissRequest = { onDismissRequest.invoke() }, properties = DialogProperties(dismissOnBackPress = true,dismissOnClickOutside = true)) {
         ElevatedCard(modifier = Modifier
             .fillMaxWidth()
-            .height(300.dp),
+            ,
             shape = CardDefaults.elevatedShape,
             colors = CardDefaults.cardColors(
                 containerColor = Color.DarkGray
             )) {
 
-            Spacer(modifier = Modifier.height(10.dp))
             TextField(value = message, onValueChange = {
             }, modifier = Modifier
                 .fillMaxWidth()
 //                .padding(17.dp)
                 .background(Color.Transparent),
                 colors = TextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.LightGray,
+                    unfocusedContainerColor = Color.White,
                     focusedTextColor = Color.Black
                 ), readOnly = true)
 

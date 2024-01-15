@@ -5,6 +5,7 @@
 package com.example.spotify_clone.screens
 
 import android.content.Context
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -155,6 +156,10 @@ fun LibraryScreen(context: Context,player: Player) {
 
             }
         }
+    }
+
+    BackHandler {
+        Router.navigateTo(Screen.HomeScreen)
     }
 }
 

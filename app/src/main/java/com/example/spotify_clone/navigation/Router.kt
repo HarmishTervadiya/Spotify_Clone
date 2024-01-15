@@ -2,6 +2,7 @@ package com.example.spotify_clone.navigation
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import com.example.spotify_clone.isServerMessage
 
 sealed class Screen {
 
@@ -18,11 +19,16 @@ sealed class Screen {
 }
 
 object Router{
-    var currentScreen: MutableState<Screen> = mutableStateOf(Screen.LibraryScreen)
+    var currentScreen: MutableState<Screen> = mutableStateOf(Screen.RegisterScreen)
     var listId= mutableStateOf(listOf<String>())
 
     fun navigateTo(destination:Screen,dataSnapshot:List<String> = listOf("",""),onClick:()->Unit={}){
         onClick.invoke()
+        when{
+            !isServerMessage.value->{
+                currentScreen.value=destination
+            }
+        }
         currentScreen.value=destination
         listId.value=dataSnapshot
     }

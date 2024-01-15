@@ -1,5 +1,6 @@
 package com.example.spotify_clone.screens
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,19 +33,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.spotify_clone.R
 import com.example.spotify_clone.components.HeadingText
+import com.example.spotify_clone.components.MessageDialog
 import com.example.spotify_clone.components.RegisterBottomSheet
 import com.example.spotify_clone.components.SignUPButton
 import com.example.spotify_clone.data.LoginRegisterViewModel
+import com.example.spotify_clone.isServerMessage
 import com.example.spotify_clone.navigation.Router
 import com.example.spotify_clone.navigation.Screen
+import com.example.spotify_clone.serverMessage
 import com.example.spotify_clone.ui.theme.Background
 import com.example.spotify_clone.ui.theme.Primary
 import com.example.spotify_clone.ui.theme.Secondary
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(context: Context){
@@ -136,15 +142,31 @@ fun RegisterScreen(context: Context){
                 }
 
 
+
+                when{
+                    isServerMessage.value ->{
+                        MessageDialog(message = serverMessage.value){
+                            isServerMessage.value=false
+                        }
+                        scope.launch{
+                            delay(2000)
+                            isServerMessage.value=false
+                        }
+                    }
+                }
                 RegisterBottomSheet(sheetState =sheetState)
+
             }
+
         }
 
         if (registerViewModel.progress.value){
             CircularProgressIndicator(color = Secondary) }
 
 
+
     }
+
 
 }
 

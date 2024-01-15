@@ -43,16 +43,20 @@ import androidx.compose.ui.unit.sp
 import androidx.media3.common.util.UnstableApi
 import com.example.spotify_clone.components.AlbumCard
 import com.example.spotify_clone.components.IndicatorText
+import com.example.spotify_clone.components.MessageDialog
 import com.example.spotify_clone.components.NowPlayingBar
 import com.example.spotify_clone.data.Firebase.ArtistViewModel
 import com.example.spotify_clone.data.Firebase.SongsViewModel
 import com.example.spotify_clone.data.HomeViewModel
 import com.example.spotify_clone.data.LoginRegisterViewModel
+import com.example.spotify_clone.isServerMessage
 import com.example.spotify_clone.musicPlayer.Player
 import com.example.spotify_clone.musicPlayer.PlayerEvent
 import com.example.spotify_clone.navigation.Router
 import com.example.spotify_clone.navigation.Screen
+import com.example.spotify_clone.serverMessage
 import com.example.spotify_clone.ui.theme.Background
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Clock
 import java.time.LocalTime
@@ -271,6 +275,17 @@ fun HomeScreen(context: Context,player:Player){
                     }
                 }
 //                MusicPlayer(showBottomSheet)
+                when{
+                    isServerMessage.value ->{
+                        MessageDialog(message = serverMessage.value){
+                            isServerMessage.value=false
+                        }
+                        scope.launch {
+                            delay(2000)
+                            isServerMessage.value=false
+                        }
+                    }
+                }
             }
 
         }

@@ -4,6 +4,7 @@ package com.example.spotify_clone.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,8 @@ import com.example.spotify_clone.components.SearchBarInput
 import com.example.spotify_clone.data.SearchScreenViewModel
 import com.example.spotify_clone.musicPlayer.Player
 import com.example.spotify_clone.musicPlayer.PlayerEvent
+import com.example.spotify_clone.navigation.Router
+import com.example.spotify_clone.navigation.Screen
 import com.example.spotify_clone.ui.theme.Background
 import kotlinx.coroutines.launch
 
@@ -95,4 +98,7 @@ fun SearchScreen(context:Context,player: Player) {
         }
     }
 
+    BackHandler {
+        Router.navigateTo(Screen.HomeScreen)
+    }
 }

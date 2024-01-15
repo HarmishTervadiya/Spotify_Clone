@@ -2,6 +2,7 @@ package com.example.spotify_clone.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +49,7 @@ import com.example.spotify_clone.data.idList
 import com.example.spotify_clone.musicPlayer.Player
 import com.example.spotify_clone.musicPlayer.PlayerEvent
 import com.example.spotify_clone.navigation.Router
+import com.example.spotify_clone.navigation.Screen
 import com.example.spotify_clone.ui.theme.Background
 import kotlinx.coroutines.launch
 
@@ -234,6 +236,9 @@ fun PlayListScreen(context:Context,player: Player){
         }
     }
 
+    BackHandler {
+        Router.navigateTo(Screen.HomeScreen)
+    }
 }
 
 
