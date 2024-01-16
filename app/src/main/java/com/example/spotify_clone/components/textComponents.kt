@@ -64,7 +64,7 @@ fun InputTextBox(value: String,onChange:(String)->Unit,state:Boolean){
             cursorColor = Primary,
             focusedTextColor = Color.Black,
             disabledTextColor = Color.White,
-            unfocusedTextColor = Color.White,
+            unfocusedTextColor = Color.Black,
             focusedLabelColor = Primary,
             errorContainerColor = Color.Transparent,
 

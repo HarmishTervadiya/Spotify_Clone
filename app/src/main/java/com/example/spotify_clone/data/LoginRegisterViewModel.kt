@@ -122,53 +122,66 @@ class LoginRegisterViewModel : ViewModel() {
         auth.signInWithCredential(credential).addOnSuccessListener {
             Router.navigateTo(Screen.HomeScreen)
             progress.value=false
+            isServerMessage.value=true
+            serverMessage.value="Sign In Successful"
         }
             .addOnFailureListener {
                 errorMessage.value=true
                 progress.value=false
+                isServerMessage.value=true
+                serverMessage.value=it.message.toString()
             }
     }
 
     private fun signUp(name: String, email: String, password: String) {
+        if (name!="" && email !="" && password !="" ) {
+            try {
+                auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+                    run {
+                        if (task.isSuccessful) {
 
-        try {
-            auth.createUserWithEmailAndPassword(email,password).addOnCompleteListener { task ->
-                run {
-                    if (task.isSuccessful) {
+                            val profileUpdates = userProfileChangeRequest {
+                                displayName = name
 
-                        val profileUpdates= userProfileChangeRequest {
-                            displayName=name
-
-                        }
-                        auth.currentUser!!.updateProfile(profileUpdates).addOnCompleteListener {
-                            if (it.isSuccessful){
-                                progress.value=false
-                                Router.navigateTo(Screen.HomeScreen)
-                            }else{
-                                errorMessage.value=false
                             }
-                        }.addOnFailureListener {
-                            errorMessage.value=false
+                            auth.currentUser!!.updateProfile(profileUpdates).addOnCompleteListener {
+                                if (it.isSuccessful) {
+                                    progress.value = false
+                                    isServerMessage.value=true
+                                    serverMessage.value="Account Created Successfully"
+                                    Router.navigateTo(Screen.HomeScreen)
+
+                                } else {
+                                    errorMessage.value = false
+                                }
+                            }.addOnFailureListener {
+                                errorMessage.value = false
+
+                            }
+
+
+                        } else {
+                            errorMessage.value = true
                         }
+                    }
 
 
-                    }
-                    else{
-                        errorMessage.value=true
-                    }
+                }.addOnFailureListener {
+                    errorMessage.value = true
+                    isServerMessage.value = true
+                    serverMessage.value = it.message.toString()
                 }
 
+            } catch (e: Exception) {
+                progress.value = true
+                error.value = errorMessage(e.message.toString())
 
-            }.addOnFailureListener {
-                errorMessage.value=true
             }
-
-        }catch (e:Exception){
-            progress.value=true
-            error.value=errorMessage(e.message.toString())
-
+        }else{
+            isServerMessage.value=true
+            serverMessage.value="Enter Details and Try again"
         }
-            }
+    }
 
     private fun loginValidationPassed(){
         loginValidation.value= (loginUIState.value.emailError==false) && (loginUIState.value.passwordError==false)

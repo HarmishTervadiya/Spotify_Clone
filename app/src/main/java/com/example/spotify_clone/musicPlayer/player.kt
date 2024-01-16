@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.example.spotify_clone.data.Firebase.ArtistViewModel
 import com.example.spotify_clone.data.Firebase.SongsViewModel
 import com.google.firebase.database.DataSnapshot
 import kotlin.math.abs
@@ -17,6 +18,11 @@ sealed class PlayerEvent{
     data class PlaylistPlay(val currentSong:DataSnapshot,val list:SnapshotStateList<DataSnapshot>):PlayerEvent()
     data class SongResumed(val isPlaying: Boolean):PlayerEvent()
     data class PlaySong(val currentSong:DataSnapshot):PlayerEvent()
+    data class SkipSong(val duration:Float):PlayerEvent()
+
+    data class NextSong(val index:Int):PlayerEvent()
+
+    data class PreviousSong(val index:Int):PlayerEvent()
 
 }
 
@@ -25,28 +31,31 @@ data class SongTrack(
     var image:String="https://firebasestorage.googleapis.com/v0/b/spotify-clone-red-ronin.appspot.com/o/song_cover%2Fdownload%20(3).jpg?alt=media&token=d1d636e8-5c16-44fb-86a6-8d0a9bc6de0c",
     var isPlaying:Boolean=false,
     var artist:String="",
-    var duration: String="",
+    var duration: Float=0f,
     var songUri:String="",
-    var mediaItemId:String=""
+    var mediaItemId:String="",
+    var hasNext:Boolean=false,
+    var hasPrevious:Boolean=false
 
 )
 
 val currentSongTrack = mutableStateOf(SongTrack())
-
+val artistViewModel=ArtistViewModel()
 class Player(context: Context) : ViewModel() {
     val player = ExoPlayer.Builder(context).build()
     private val thread = Thread()
     private val songViewModel=SongsViewModel()
+    val songList=songViewModel.Songs
 
 
     private fun playSong() {
-        val songList=songViewModel.Songs
         val list= mutableListOf<String>()
         songList.forEach {
             it.let{
                 list.add(it.child("Song_Name").value.toString())
             }
         }
+
 
         player.clearMediaItems()
         thread.run {
@@ -71,13 +80,16 @@ class Player(context: Context) : ViewModel() {
 
                 override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
 
-                    Log.d("Call back successful","Call back Successful ${mediaItem?.mediaId}")
+                    Log.d("Call back successful","Call back Successful ${player.hasNextMediaItem()} ${player.hasPreviousMediaItem()}")
                     if (mediaItem?.mediaId!=currentSongTrack.value.mediaItemId) {
                         currentSongTrack.value = currentSongTrack.value.copy(
                             title = nextItem.child("Song_Name").value.toString(),
                             image = nextItem.child("cover_image").value.toString(),
                             songUri = nextItem.child("SongUri").value.toString(),
-                            mediaItemId = nextItem.key.toString()
+                            mediaItemId = nextItem.key.toString(),
+                            artist =  nextItem.child("ArtistId").value.toString(),
+                            hasPrevious = true,
+                            hasNext =player.hasNextMediaItem()
                         )
 
                         randomIndex = (0 until abs(songList.lastIndex).inc()).random()
@@ -129,13 +141,16 @@ class Player(context: Context) : ViewModel() {
             if (currentSongTrack.value.mediaItemId != event.currentSong.key.toString()) {
                 player.stop()
                 player.clearMediaItems()
-
                 currentSongTrack.value = currentSongTrack.value.copy(
                     isPlaying = true,
                     title = event.currentSong.child("Song_Name").value.toString(),
                     image = event.currentSong.child("cover_image").value.toString(),
                     songUri = event.currentSong.child("SongUri").value.toString(),
-                    mediaItemId = event.currentSong.key.toString()
+                    mediaItemId = event.currentSong.key.toString(),
+                    artist =  event.currentSong.child("ArtistId").value.toString(),
+                    duration = event.currentSong.child("duration").value.toString().toFloat(),
+                    hasPrevious = false,
+                    hasNext =false
                 )
             }
             playSong()
@@ -143,7 +158,6 @@ class Player(context: Context) : ViewModel() {
         }
 
         is PlayerEvent.PlaylistPlay->{
-
             if(currentSongTrack.value.mediaItemId != event.currentSong.key.toString()) {
                 player.stop()
                 player.clearMediaItems()
@@ -153,12 +167,73 @@ class Player(context: Context) : ViewModel() {
                     title = event.currentSong.child("Song_Name").value.toString(),
                     image = event.currentSong.child("cover_image").value.toString(),
                     songUri = event.currentSong.child("SongUri").value.toString(),
-                    mediaItemId = event.currentSong.key.toString()
+                    mediaItemId = event.currentSong.key.toString(),
+                    artist =  event.currentSong.child("ArtistId").value.toString(),
+                    hasPrevious = player.hasPreviousMediaItem(),
+                    hasNext =player.hasNextMediaItem()
                 )
             }
             playSongList(event.list)
         }
 
+        is PlayerEvent.SkipSong->{
+            player.seekTo(event.duration.toLong())
+//            player.addListener(object : Player.Listener{
+//                override fun onSeekForwardIncrementChanged(seekForwardIncrementMs: Long) {
+//                    super.onSeekForwardIncrementChanged(seekForwardIncrementMs)
+//                }
+//            })
+        }
+
+        is PlayerEvent.NextSong -> {
+            pause()
+            player.seekToNextMediaItem()
+            val nextSong= mutableStateOf(songList.first())
+            songList.forEach { snapshot ->
+                snapshot?.let {
+                    if (it.key.toString()==player.currentMediaItem?.mediaId){
+                        nextSong.value=it
+                    }
+                }
+            }
+
+            currentSongTrack.value= currentSongTrack.value.copy(
+                isPlaying = true,
+                title = nextSong.value.child("Song_Name").value.toString(),
+                image = nextSong.value.child("cover_image").value.toString(),
+                songUri = nextSong.value.child("SongUri").value.toString(),
+                mediaItemId = nextSong.value.key.toString(),
+                artist =  nextSong.value.child("ArtistId").value.toString(),
+                hasPrevious = player.hasPreviousMediaItem(),
+                hasNext =player.hasNextMediaItem()
+            )
+            resume()
+        }
+        is PlayerEvent.PreviousSong -> {
+            pause()
+            player.seekToPreviousMediaItem()
+            val previousSong= mutableStateOf(songList.first())
+            songList.forEach { snapshot ->
+                snapshot?.let {
+                    if (it.key.toString()==player.currentMediaItem?.mediaId){
+                        previousSong.value=it
+                    }
+                }
+            }
+
+            currentSongTrack.value= currentSongTrack.value.copy(
+                isPlaying = true,
+                title = previousSong.value.child("Song_Name").value.toString(),
+                image = previousSong.value.child("cover_image").value.toString(),
+                songUri = previousSong.value.child("SongUri").value.toString(),
+                mediaItemId = previousSong.value.key.toString(),
+                artist =  previousSong.value.child("ArtistId").value.toString(),
+                hasPrevious = player.hasPreviousMediaItem(),
+                hasNext =player.hasNextMediaItem()
+            )
+
+            resume()
+        }
     }
 
     private fun playSongList(list: SnapshotStateList<DataSnapshot>) {
@@ -203,7 +278,10 @@ class Player(context: Context) : ViewModel() {
                             title = nextItem.child("Song_Name").value.toString(),
                             image = nextItem.child("cover_image").value.toString(),
                             songUri = nextItem.child("SongUri").value.toString(),
-                            mediaItemId = nextItem.key.toString()
+                            mediaItemId = nextItem.key.toString(),
+                            artist =  nextItem.child("ArtistId").value.toString(),
+                            hasPrevious = true,
+                            hasNext =player.hasNextMediaItem()
                         )
 
                         randomIndex++

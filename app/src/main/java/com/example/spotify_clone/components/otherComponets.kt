@@ -1,9 +1,10 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class,
+    ExperimentalLayoutApi::class
+)
 
 package com.example.spotify_clone.components
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,10 +28,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.outlined.AddCircle
+import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -40,22 +42,26 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -69,60 +75,16 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.example.spotify_clone.R
+import com.example.spotify_clone.data.Firebase.listOfCurrentArtist
 import com.example.spotify_clone.data.LibraryScreenViewModel
 import com.example.spotify_clone.musicPlayer.Player
 import com.example.spotify_clone.musicPlayer.PlayerEvent
+import com.example.spotify_clone.musicPlayer.artistViewModel
 import com.example.spotify_clone.musicPlayer.currentSongTrack
 import com.example.spotify_clone.ui.theme.Background
 import com.example.spotify_clone.ui.theme.Secondary
 import kotlinx.coroutines.launch
-
-@Composable
-fun HeadingTopBar(value:String,icon1:ImageVector,icon2:ImageVector,onHeartCLick:()->Unit,onSettingClick:()->Unit){
-
-    Row (horizontalArrangement = Arrangement.Start, modifier = Modifier
-        .fillMaxWidth()
-        .height(60.dp)) {
-        Text(
-            text = value,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .padding(10.dp)
-                .weight(.1f)
-                .fillMaxHeight()
-        )
-        Icon(
-            imageVector = icon1,
-            contentDescription = "Favourite",
-            tint = Color.Red,
-            modifier = Modifier
-                .fillMaxHeight()
-                .padding(15.dp)
-                .align(Alignment.Bottom)
-                .clickable {
-                    onHeartCLick.invoke()
-                }
-        )
-
-        Icon(
-            imageVector = icon2,
-            contentDescription = "Favourite",
-            tint = Color.White,
-            modifier = Modifier
-                .fillMaxHeight()
-                .padding(12.dp)
-                .align(Alignment.Bottom)
-                .clickable {
-                    onSettingClick.invoke()
-                }
-        )
-
-    }
-}
-
+import kotlin.math.abs
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -169,47 +131,71 @@ fun AlbumCard(title:String, image: String, onClick:()->Unit){
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun NowPlayingBar(context: Context,player:Player,onCLick:()->Unit) {
-
+fun NowPlayingBar(player: Player, onCLick: () -> Unit) {
 
 
     val track=mutableStateOf(currentSongTrack.value)
+    val artists= remember {
+    mutableStateOf(artistViewModel.getListOfArtist(track.value.artist))
+    }
+
     val showBottomSheet = remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
-    NavigationBar(modifier = Modifier
-        .background(Background)
-        .height(70.dp)
-        .clickable {
-            onCLick.invoke()
-            showBottomSheet.value = true
-            scope.launch {
-            }
-        }
-        , containerColor = Color(0x3AD8D8D8),
-        contentColor = Color.White,
-        tonalElevation = 8.dp,
+    val currentValue = remember{ mutableFloatStateOf(player.player.currentPosition.toFloat()) }
 
-        ) {
+    val libraryScreenViewModel=LibraryScreenViewModel()
 
-            AsyncImage(model = track.value.image, contentDescription = "", placeholder = painterResource(id = R.drawable.logo),
+    val showContextMenu= remember {
+        mutableStateOf(false)
+    }
+
+//    LaunchedEffect(player.player) {
+//        while (true) {
+//            currentValue.floatValue = player.player.currentPosition.toFloat()
+//            delay(1000) // Adjust the delay based on your update frequency
+//        }
+//    }
+
+    if (track.value.title!="") {
+        NavigationBar(
             modifier = Modifier
-                .padding(5.dp)
-                .fillMaxHeight()
-                .width(70.dp), contentScale = ContentScale.Fit
-                )
+                .background(Background)
+                .height(70.dp)
+                .clickable {
+                    onCLick.invoke()
+                    showBottomSheet.value = true
+                },
+            containerColor = Color(0x3AD8D8D8),
+            contentColor = Color.White,
+            tonalElevation = 8.dp,
+
+            ) {
+
+            AsyncImage(
+                model = track.value.image,
+                contentDescription = "",
+                placeholder = painterResource(id = R.drawable.logo),
+                modifier = Modifier
+                    .padding(5.dp)
+                    .fillMaxHeight()
+                    .width(70.dp),
+                contentScale = ContentScale.Fit
+            )
 
 
 
-            Text(text = track.value.title, color = Color.White,
+            Text(
+                text = track.value.title, color = Color.White,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .fillMaxSize()
                     .weight(1f)
                     .padding(12.dp),
-                textAlign = TextAlign.Left)
+                textAlign = TextAlign.Left
+            )
 
 
             if (track.value.isPlaying) {
@@ -226,7 +212,7 @@ fun NowPlayingBar(context: Context,player:Player,onCLick:()->Unit) {
                             player.onEvent(PlayerEvent.SongPaused(false))
                         })
 
-            }else {
+            } else {
                 Icon(
                     imageVector = Icons.Filled.PlayArrow, contentDescription = "Play",
                     modifier = Modifier
@@ -243,28 +229,241 @@ fun NowPlayingBar(context: Context,player:Player,onCLick:()->Unit) {
 
         }
 
-    if (showBottomSheet.value) {
-        ModalBottomSheet(
-            onDismissRequest = {
-                showBottomSheet.value = false
-            },
-            sheetState = sheetState,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // Sheet content
-            Button(onClick = {
-                scope.launch { sheetState.hide() }.invokeOnCompletion {
-                    if (!sheetState.isVisible) {
-                        showBottomSheet.value =false
-                    }
+//    Expanded State
+
+        if (showBottomSheet.value) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    showBottomSheet.value = false
+                },
+                sheetState = sheetState,
+                containerColor = Color.DarkGray,
+                modifier = Modifier.fillMaxSize()
+            ) {
+
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Icon(imageVector = Icons.Filled.KeyboardArrowDown,
+                        tint = Color.White,
+                        contentDescription = "Collapse",
+                        modifier = Modifier
+                            .clickable {
+                                scope.launch {
+                                    sheetState.hide()
+                                    showBottomSheet.value = false
+                                }
+                            }
+                            .height(30.dp)
+                            .width(30.dp)
+                            .align(Alignment.Top))
+
+                    Text(
+                        text = "Current Playing Song",
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(30.dp)
+                            .weight(1f)
+                            .align(Alignment.CenterVertically)
+                            .padding(2.dp)
+                    )
+
+
+
                 }
-            }) {
-                Text("Hide bottom sheet")
+
+
+                AsyncImage(
+                    model = track.value.image, contentDescription = currentSongTrack.value.title,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(320.dp)
+                        .padding(8.dp), contentScale = ContentScale.Fit
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = track.value.title,
+                    color = Color.White,
+                    textAlign = TextAlign.Start,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 32.dp)
+                )
+
+                Text(
+                    text = listOfCurrentArtist.value,
+                    color = Color.LightGray,
+                    textAlign = TextAlign.Start,
+                    fontSize = 18.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 32.dp)
+                )
+
+
+
+                Slider(
+                    valueRange = 0f..abs(player.player.contentDuration.toFloat()),
+                    value = currentValue.floatValue,
+                    onValueChange = {
+                        scope.launch {
+                            currentValue.floatValue = it
+                            track.value.duration = it
+                            player.onEvent(PlayerEvent.SkipSong(it))
+                        }
+                    },
+                    steps = 0,
+                    modifier = Modifier.padding(horizontal = 30.dp),
+                    colors = SliderDefaults.colors(
+                        activeTrackColor = Color.Red,
+                        activeTickColor = Color.Red,
+                        thumbColor = Color.Red,
+                    )
+                )
+
+
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp, horizontal = 30.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+
+                    val liked = remember {
+                        mutableStateOf(false)
+                    }
+
+                    val color = remember {
+                        mutableStateOf(Color.White)
+                    }
+                    Icon(imageVector = if (liked.value) {
+                        Icons.Filled.Favorite
+                    } else {
+                        Icons.Rounded.FavoriteBorder
+                    }, contentDescription = "Like", tint = color.value, modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .clickable {
+                            liked.value = true
+                            color.value = Color.Red
+                            libraryScreenViewModel.addLike(track.value.mediaItemId)
+                        })
+
+                    IconButton(
+                        onClick = {  player.onEvent(PlayerEvent.PreviousSong(0)) },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            disabledContentColor = Color.Gray,
+                            disabledContainerColor = Color.Transparent,
+                            contentColor = Color.White
+                        ),
+                      enabled = track.value.hasPrevious,
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) {
+                        Icon(painterResource(id = R.drawable.previous),
+                            contentDescription = "Previous",
+                            modifier = Modifier
+                                .width(45.dp)
+                                .align(Alignment.CenterVertically))
+                    }
+
+                    if (track.value.isPlaying) {
+                        IconButton(
+                            onClick = { player.onEvent(PlayerEvent.SongPaused(false)) },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = Color.White,
+
+                            ),
+                            modifier = Modifier
+                                .width(70.dp)
+                                .height(70.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.pauseicon),
+                                contentDescription = "Pause",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(20.dp)
+                                    .align(Alignment.CenterVertically)
+                            )
+                        }
+                    } else {
+
+                        IconButton(
+                            onClick = { player.onEvent(PlayerEvent.SongResumed(true)) },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = Color.White
+                            ),
+                            modifier = Modifier
+                                .width(70.dp)
+                                .height(70.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.PlayArrow,
+                                contentDescription = "Pause",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(10.dp)
+                                    .align(Alignment.CenterVertically)
+                            )
+                        }
+
+                    }
+
+                    IconButton(
+                        onClick = {  player.onEvent(PlayerEvent.NextSong(0)) },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.White
+                        ),
+                        enabled = track.value.hasNext,
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) {
+                        Icon(
+                            painterResource(id = R.drawable.nextbutton),
+                            contentDescription = "Next",
+                            modifier = Modifier
+                                .width(45.dp)
+                                .align(Alignment.CenterVertically)
+                        )
+                    }
+
+
+
+                    Icon(imageVector = Icons.Outlined.AddCircle,
+                        contentDescription = "Add to Playlist",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .clickable { showContextMenu.value=true})
+
+
+                }
+
             }
         }
     }
 
+
+    val currentItem= remember {
+        mutableListOf(track.value.mediaItemId)
     }
+
+    if (showContextMenu.value){
+        SongOptionMenu(data = currentItem) {
+            showContextMenu.value=false
+        }
+    }
+}
 
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -497,7 +696,6 @@ fun SongOptionMenu(data: MutableList<String>, onDismissRequest: () -> Unit){
         LibraryScreenViewModel()
     }
 
-    val scope= rememberCoroutineScope()
     val playlists= remember {
         viewModel.listOfPlaylists
     }
@@ -547,3 +745,5 @@ fun SongOptionMenu(data: MutableList<String>, onDismissRequest: () -> Unit){
         }
     }
 }
+
+

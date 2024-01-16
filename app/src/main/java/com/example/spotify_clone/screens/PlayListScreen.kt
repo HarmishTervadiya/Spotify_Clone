@@ -3,6 +3,7 @@ package com.example.spotify_clone.screens
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -97,7 +98,7 @@ fun PlayListScreen(context:Context,player: Player){
         Scaffold(
             containerColor = Background,
             bottomBar = {
-                NowPlayingBar(context = context, player = player, onCLick = {  })
+                NowPlayingBar(player = player) { }
             },
             contentColor = Background
 
@@ -124,6 +125,9 @@ fun PlayListScreen(context:Context,player: Player){
                             .padding(5.dp)
                             .height(30.dp)
                             .width(50.dp)
+                            .clickable {
+                                Router.navigateTo(Screen.HomeScreen)
+                            }
                     )
                     ElevatedCard(
                         modifier = Modifier

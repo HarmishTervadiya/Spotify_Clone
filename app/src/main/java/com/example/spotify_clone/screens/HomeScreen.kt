@@ -81,7 +81,7 @@ fun HomeScreen(context: Context,player:Player){
         }
         Scaffold(
             containerColor = Background,
-            bottomBar = { NowPlayingBar(context = context, player = player,onCLick={ bottomSheet() })
+            bottomBar = { NowPlayingBar(player = player) { bottomSheet() }
             },
             contentColor = Background
             // Place BottomNav within the Scaffold's bottomBar
@@ -247,7 +247,7 @@ fun HomeScreen(context: Context,player:Player){
                     Spacer(modifier = Modifier.height(8.dp))
 
 
-                    val topArtists = ArtistViewModel(context).getAllArtists()
+                    val topArtists = ArtistViewModel().getAllArtists()
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         userScrollEnabled = true,

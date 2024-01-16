@@ -21,11 +21,13 @@ import com.example.spotify_clone.navigation.Screen
 import com.example.spotify_clone.ui.theme.Background
 
 
+//val expandPlayingBar=mutableStateOf(false)
 @Composable
 fun ContainerScreen(context: Context){
     val player= remember {
         mutableStateOf(Player(context))
     }
+
 
     Scaffold(
         containerColor = Background,
@@ -76,6 +78,7 @@ fun ContainerScreen(context: Context){
 
 
     }
+
 }
 
 

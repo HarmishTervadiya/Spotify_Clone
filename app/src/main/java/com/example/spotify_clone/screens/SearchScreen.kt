@@ -52,7 +52,7 @@ fun SearchScreen(context:Context,player: Player) {
         Scaffold(
             containerColor = Background,
             bottomBar = {
-                NowPlayingBar(context = context, player = player, onCLick = { bottomSheet() })
+                NowPlayingBar(player = player) { bottomSheet() }
             },
             contentColor = Background
             // Place BottomNav within the Scaffold's bottomBar

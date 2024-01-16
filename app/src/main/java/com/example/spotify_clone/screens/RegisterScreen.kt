@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
@@ -121,8 +120,6 @@ fun RegisterScreen(context: Context){
 
 
 
-
-
                     val signInRequest= GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                         .requestEmail()
                         .requestProfile()
@@ -141,29 +138,25 @@ fun RegisterScreen(context: Context){
                     Router.navigateTo(Screen.LoginScreen)
                 }
 
-
-
-                when{
-                    isServerMessage.value ->{
-                        MessageDialog(message = serverMessage.value){
-                            isServerMessage.value=false
-                        }
-                        scope.launch{
-                            delay(2000)
-                            isServerMessage.value=false
-                        }
-                    }
-                }
                 RegisterBottomSheet(sheetState =sheetState)
 
             }
 
         }
 
-        if (registerViewModel.progress.value){
-            CircularProgressIndicator(color = Secondary) }
 
-
+        val scope= rememberCoroutineScope()
+        when{
+            isServerMessage.value ->{
+                MessageDialog(message = serverMessage.value){
+                    isServerMessage.value=false
+                }
+                scope.launch {
+                    delay(3000)
+                    isServerMessage.value=false
+                }
+            }
+        }
 
     }
 

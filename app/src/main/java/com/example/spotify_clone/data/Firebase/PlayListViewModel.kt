@@ -1,7 +1,6 @@
 package com.example.spotify_clone.data.Firebase
 
 import android.util.Log
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -15,13 +14,10 @@ import com.google.firebase.database.database
 val userUid=Firebase.auth.currentUser?.uid.toString()
 class PlayListViewModel {
     private val db= Firebase.database.reference.child("Playlists").ref
-    val id= mutableIntStateOf(0)
-
-
 
     fun addPlaylist(name:String): Boolean {
         val res= mutableStateOf(false)
-        var index= mutableStateOf("Pl${(1 until 99999).random()}")
+        val index= mutableStateOf("Pl${(1 until 99999).random()}")
         val idList= mutableStateListOf<String>()
         db.addValueEventListener(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -59,7 +55,6 @@ class PlayListViewModel {
             }
         }
 
-
         return res.value
 
     }
@@ -73,7 +68,7 @@ class PlayListViewModel {
                         list.add(it)
                     }
                 }
-                Log.d("Failed",list.toList().toString())
+//                Log.d("Failed",list.toList().toString())
 
             }
 
@@ -82,7 +77,7 @@ class PlayListViewModel {
             }
 
         })
-        Log.d("Failed",list.toList().toString())
+//        Log.d("Failed",list.toList().toString())
         return list
     }
 
