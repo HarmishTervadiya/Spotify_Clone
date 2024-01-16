@@ -21,7 +21,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -162,19 +161,19 @@ fun HomeScreen(context: Context,player:Player){
                                     LoginRegisterViewModel().logout()
                                 }
                         )
-                        Icon(
-                            imageVector = Icons.Filled.Settings,
-                            contentDescription = "Setting",
-                            tint = Color.White,
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .padding(12.dp)
-                                .align(Alignment.Bottom)
-                                .clickable {
-
-                                }
-
-                        )
+//                        Icon(
+//                            imageVector = Icons.Filled.Settings,
+//                            contentDescription = "Setting",
+//                            tint = Color.White,
+//                            modifier = Modifier
+//                                .fillMaxHeight()
+//                                .padding(12.dp)
+//                                .align(Alignment.Bottom)
+//                                .clickable {
+//
+//                                }
+//
+//                        )
 
                     }
 

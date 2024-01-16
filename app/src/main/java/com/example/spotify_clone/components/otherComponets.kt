@@ -55,6 +55,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -83,6 +84,7 @@ import com.example.spotify_clone.musicPlayer.artistViewModel
 import com.example.spotify_clone.musicPlayer.currentSongTrack
 import com.example.spotify_clone.ui.theme.Background
 import com.example.spotify_clone.ui.theme.Secondary
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -151,12 +153,12 @@ fun NowPlayingBar(player: Player, onCLick: () -> Unit) {
         mutableStateOf(false)
     }
 
-//    LaunchedEffect(player.player) {
-//        while (true) {
-//            currentValue.floatValue = player.player.currentPosition.toFloat()
-//            delay(1000) // Adjust the delay based on your update frequency
-//        }
-//    }
+    LaunchedEffect(player.player) {
+        while (true) {
+            currentValue.floatValue = player.player.currentPosition.toFloat()
+            delay(1000) // Adjust the delay based on your update frequency
+        }
+    }
 
     if (track.value.title!="") {
         NavigationBar(

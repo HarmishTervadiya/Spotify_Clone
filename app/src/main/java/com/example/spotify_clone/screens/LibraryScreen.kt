@@ -120,6 +120,7 @@ fun LibraryScreen(context: Context,player: Player) {
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 7.dp)
                     )
+
                     val playlists= remember {
                         viewModel.listOfPlaylists
                     }
