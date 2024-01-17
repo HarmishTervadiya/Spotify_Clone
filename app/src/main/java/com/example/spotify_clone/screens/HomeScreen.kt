@@ -197,7 +197,10 @@ fun HomeScreen(context: Context,player:Player){
                                 title = it.child("Song_Name").value.toString(),
                                 image = it.child("cover_image").value.toString(),
                                 onClick = {
-                                    player.onEvent(PlayerEvent.PlaySong(it)) })
+                                    scope.launch {
+                                        player.onEvent(PlayerEvent.PlaySong(it))
+                                    }
+                                     })
                         }
 
                     }
